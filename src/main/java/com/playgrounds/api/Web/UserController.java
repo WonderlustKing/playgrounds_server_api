@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class UserController {
         User newUser = userRepository.save(user);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(UserController.class).slash(newUser.getUsername()).toUri());
+        headers.setLocation(linkTo(UserController.class).slash(newUser.getId()).toUri());
         return headers;
     }
 
@@ -43,7 +44,7 @@ public class UserController {
         List<Resource<User>> allUsers = new ArrayList<Resource<User>>();
         for(User user: users){
             Resource<User> resource = new Resource<User>(user);
-            resource.add(linkTo(UserController.class).slash(user.getUsername()).withSelfRel());
+            resource.add(linkTo(UserController.class).slash(user.getId()).withSelfRel());
             allUsers.add(resource);
         }
         return allUsers;
@@ -55,8 +56,10 @@ public class UserController {
         User user = userRepository.findByUsername(username);
         if(user == null) throw new UserNotFoundException(username);
         Resource<User> resource = new Resource<User>(user);
-        resource.add(linkTo(UserController.class).slash(user.getUsername()).withSelfRel());
+        resource.add(linkTo(UserController.class).slash(user.getId()).withSelfRel());
         return resource;
     }
+
+
 
 }

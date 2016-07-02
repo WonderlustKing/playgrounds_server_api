@@ -1,6 +1,7 @@
 package com.playgrounds.api.Domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
@@ -20,9 +21,8 @@ public class Playground {
 
     private String city;
 
-    private double latitude;
-
-    private double longitude;
+    @Indexed
+    private Location location;
 
     private List<Rate> rate = new ArrayList<Rate>();
 
@@ -53,12 +53,12 @@ public class Playground {
         this.city = city;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public List<Rate> getRate() {
@@ -77,11 +77,4 @@ public class Playground {
         this.imageURL = imageURL;
     }
 
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
 }
