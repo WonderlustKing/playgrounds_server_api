@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,9 +25,15 @@ public class Playground {
     @Indexed
     private Location location;
 
+    private int rates_num;
+
     private List<Rate> rate = new ArrayList<Rate>();
 
     private URL imageURL;
+
+    private double popularity =0;
+
+    private Date date_added;
 
 
     public String getId() {
@@ -77,4 +84,27 @@ public class Playground {
         this.imageURL = imageURL;
     }
 
+    public double getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(double popularity) {
+        this.popularity = popularity;
+    }
+
+    public Date getDate_added() {
+        return date_added;
+    }
+
+    public void setDate_added(Date date_added) {
+        this.date_added = date_added;
+    }
+
+    public int getRates_num() {
+        return rates_num;
+    }
+
+    public void setRates_num(int rates_num) {
+        this.rates_num = rates_num;
+    }
 }

@@ -16,5 +16,5 @@ public interface PlaygroundOperations {
     public WriteResult updateRate(Playground playground, Rate rate);
     public List<GeneralRate> findByCityOrderByRate(String city);
     public List<GeneralRate> findUnRatePlaygrounds(String city);
-    public List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance);
+    public List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance, String sort);
 }

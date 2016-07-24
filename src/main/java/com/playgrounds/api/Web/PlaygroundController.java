@@ -11,10 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -44,14 +41,22 @@ public class PlaygroundController {
         return headers;
     }
 
-    @RequestMapping(value = "/rate", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Playground playground_details(@PathVariable("id") String id){
+        Playground playground = playgroundRepository.findById(id);
+        playground.setRates_num(playground.getRate().size());
+        return playground;
+    }
+
+    @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders addRate(@RequestBody Rate rate, @RequestParam(value = "name") String playground_name, @RequestParam(value = "city") String city){
-        Playground playground = playgroundRepository.findByCityIgnoreCaseAndNameIgnoreCase(city,playground_name);
+    public HttpHeaders addRate(@RequestBody Rate rate, @PathVariable("playground_id") String id){
+        Playground playground = playgroundRepository.findById(id);
         String username = rate.getUser().getUsername();
         User user = userRepository.findByUsername(username);
         if(user == null) throw new UsernameNotFoundException(username);
-        if(playground == null) throw new PlaygroundNotFoundException(city, playground_name);
+        if(playground == null) throw new PlaygroundNotFoundException(id);
         rate.getUser().setId(user.getId());
         playgroundRepository.addRate(playground, rate);
 
@@ -60,13 +65,13 @@ public class PlaygroundController {
         return headers;
     }
 
-    @RequestMapping(value = "/rate", method = RequestMethod.PUT, consumes = "application/json")
-    public HttpHeaders updateRate(@RequestBody Rate rate, @RequestParam(value = "name") String playground_name, @RequestParam(value = "city") String city){
-        Playground playground = playgroundRepository.findByCityIgnoreCaseAndNameIgnoreCase(city,playground_name);
+    @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.PUT, consumes = "application/json")
+    public HttpHeaders updateRate(@RequestBody Rate rate, @PathVariable("playground_id") String id){
+        Playground playground = playgroundRepository.findById(id);
         String username = rate.getUser().getUsername();
         User user = userRepository.findByUsername(username);
         if(user == null) throw new UsernameNotFoundException(username);
-        if(playground == null) throw new PlaygroundNotFoundException(city, playground_name);
+        if(playground == null) throw new PlaygroundNotFoundException(id);
         rate.getUser().setId(user.getId());
         playgroundRepository.updateRate(playground, rate);
 
@@ -76,15 +81,10 @@ public class PlaygroundController {
     }
 
 
-    @RequestMapping(value = "/{city_name}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/city/{city_name}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<Resource<GeneralRate>> getAllPlaygroundsByCity(@PathVariable("city_name") String city){
-        List<GeneralRate> ratedPlaygrounds = playgroundRepository.findByCityOrderByRate(city);
-        List<GeneralRate> unratedPlaygrounds = playgroundRepository.findUnRatePlaygrounds(city);
-        List<GeneralRate> playgrounds = new ArrayList<GeneralRate>();
-        playgrounds.addAll(ratedPlaygrounds);
-        playgrounds.addAll(unratedPlaygrounds);
-
+        List<GeneralRate> playgrounds = playgroundRepository.findByCityOrderByRate(city);
 
         List<Resource<GeneralRate>> allPlaygrounds = new ArrayList<Resource<GeneralRate>>();
         for(GeneralRate rate_playground: playgrounds){
@@ -100,6 +100,7 @@ public class PlaygroundController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Resource<Playground> getPlayground(@PathVariable("city_name") String city, @PathVariable("playground_name") String name){
         Playground playground = playgroundRepository.findByCityIgnoreCaseAndNameIgnoreCase(city,name);
+        if(playground == null) throw new PlaygroundNotFoundException(city,name);
         Resource<Playground> resource = new Resource<Playground>(playground);
         resource.add(linkTo(PlaygroundController.class).slash(playground.getCity()).slash(playground.getName()).withSelfRel());
         return resource;
@@ -107,15 +108,16 @@ public class PlaygroundController {
 
     @RequestMapping(value="/near_me", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Resource<GeneralRate>> nearMe(@RequestParam(value = "x") double x, @RequestParam(value = "y") double y, @RequestParam(value = "maxDistance") int max){
-        List<GeneralRate> playgrounds = playgroundRepository.nearMePlaygrounds(x,y,max);
+    public List<Resource<GeneralRate>> nearMe(@RequestParam(value = "x") double x, @RequestParam(value = "y") double y, @RequestParam(value = "maxDistance") int max, @RequestParam(value="sort",defaultValue = "distance") String sort){
+        List<GeneralRate> playgrounds = playgroundRepository.nearMePlaygrounds(x,y,max,sort);
         List<Resource<GeneralRate>> resource_playgrounds = new ArrayList<Resource<GeneralRate>>();
         for(GeneralRate playground : playgrounds){
             Resource<GeneralRate> resource = new Resource<GeneralRate>(playground);
             resource.add(linkTo(PlaygroundController.class).slash(playground.getId()).withSelfRel());
             resource_playgrounds.add(resource);
         }
-        return resource_playgrounds;
+        Collections.reverse(resource_playgrounds);
+        return  resource_playgrounds;
     }
 
 
