@@ -34,6 +34,8 @@ public class PlaygroundController {
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public HttpHeaders savePlayground(@RequestBody Playground playground){
+        User user = userRepository.findById(playground.getAdded_by());
+        if(user == null) throw new UsernameNotFoundException(playground.getAdded_by());
         Playground newPlayground = playgroundRepository.save(playground);
 
         HttpHeaders headers = new HttpHeaders();
@@ -41,42 +43,64 @@ public class PlaygroundController {
         return headers;
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{playground_id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Playground playground_details(@PathVariable("id") String id){
+    public Resource<Playground> playground_details(@PathVariable("playground_id") String id,@RequestParam(value = "user", required = false) String user){
         Playground playground = playgroundRepository.findById(id);
         playground.setRates_num(playground.getRate().size());
-        return playground;
+        if(user != null) {
+            Iterator it = playground.getRate().iterator();
+            while (it.hasNext()) {
+                Rate rate1 = (Rate) it.next();
+                if (rate1.getUser().equals(user)) {
+                    it.remove();
+                    playground.getRate().addFirst(rate1);
+                    break;
+                }
+            }
+        }
+
+        Resource<Playground> resource = new Resource<Playground>(playground);
+        resource.add(linkTo(UserController.class).slash(playground.getAdded_by()).withRel("added_by"));
+
+        return resource;
     }
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public HttpHeaders addRate(@RequestBody Rate rate, @PathVariable("playground_id") String id){
         Playground playground = playgroundRepository.findById(id);
-        String username = rate.getUser().getUsername();
-        User user = userRepository.findByUsername(username);
-        if(user == null) throw new UsernameNotFoundException(username);
+        String user_id = rate.getUser();
+        User user = userRepository.findById(user_id);
+        if(playground.getRate().size() > 0) {
+            ListIterator<Rate> list = playground.getRate().listIterator();
+            while (list.hasNext()) {
+                Rate rateSearch = list.next();
+                if (rateSearch.getUser().equals(rate.getUser())) throw new UserRateExistException(user_id);
+            }
+        }
+        if(user == null) throw new UsernameNotFoundException(user_id);
         if(playground == null) throw new PlaygroundNotFoundException(id);
-        rate.getUser().setId(user.getId());
+        //rate.setUser(user_id);
         playgroundRepository.addRate(playground, rate);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(username.toLowerCase()).toUri());
+        //headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(user.getUsername().toLowerCase()).toUri());
         return headers;
     }
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.PUT, consumes = "application/json")
     public HttpHeaders updateRate(@RequestBody Rate rate, @PathVariable("playground_id") String id){
         Playground playground = playgroundRepository.findById(id);
-        String username = rate.getUser().getUsername();
-        User user = userRepository.findByUsername(username);
-        if(user == null) throw new UsernameNotFoundException(username);
+        String user_id = rate.getUser();
+        User user = userRepository.findById(user_id);
+        if(user == null) throw new UsernameNotFoundException(user_id);
         if(playground == null) throw new PlaygroundNotFoundException(id);
-        rate.getUser().setId(user.getId());
+        //rate.getUser().setId(user.getId());
         playgroundRepository.updateRate(playground, rate);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(username.toLowerCase()).toUri());
+        //headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(user.getUsername().toLowerCase()).toUri());
         return headers;
     }
 
@@ -120,7 +144,25 @@ public class PlaygroundController {
         return  resource_playgrounds;
     }
 
+    @RequestMapping(value = "/report/{id}", method = RequestMethod.POST, produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public HttpHeaders reportPlayground(@RequestBody Report report, @PathVariable("id") String playground_id){
+        Playground playground = playgroundRepository.findById(playground_id);
+        if(playground == null) throw new PlaygroundNotFoundException(playground_id);
+        playgroundRepository.addReport(report,playground);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(linkTo(PlaygroundController.class).slash("report").slash(playground_id).slash(report.getUser_id()).toUri());
+        return headers;
+    }
 
+    @RequestMapping(value = "/rate/{playground_id}/{user_id}", method = RequestMethod.GET, consumes = "application/json")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Resource<Rate> getUserRate(@PathVariable("playground_id") String playground_id, @PathVariable("user_id") String user_id){
+        Rate rate = playgroundRepository.findRate(playground_id,user_id);
 
+            Resource<Rate> resource = new Resource<Rate>(rate);
+            resource.add(linkTo(PlaygroundController.class).slash("rate").slash(playground_id).slash(user_id).withSelfRel());
+            return resource;
 
+    }
 }

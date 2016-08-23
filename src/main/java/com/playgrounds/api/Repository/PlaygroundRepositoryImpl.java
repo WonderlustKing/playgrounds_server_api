@@ -4,15 +4,15 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.playgrounds.api.CustomGroupOperation;
-import com.playgrounds.api.Domain.GeneralRate;
-import com.playgrounds.api.Domain.Playground;
-import com.playgrounds.api.Domain.Rate;
+import com.playgrounds.api.Domain.*;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.*;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperationContext;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.query.*;
@@ -22,6 +22,7 @@ import java.awt.Point;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 /**
  * Created by christos on 16/5/2016.
@@ -32,22 +33,88 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     private MongoOperations mongo;
 
     @Override
-    public WriteResult addRate(Playground playground, Rate rate) {
-        Criteria where = Criteria.where("name").is(playground.getName()).and("city").is(playground.getCity());
+    public Playground addRate(Playground playground, Rate rate) {
+        Criteria where = where("id").is(playground.getId());
         Query query = Query.query(where);
         Update update = new Update();
         update.push("rate",rate);
-        return mongo.updateFirst(query, update, Playground.class);
+        mongo.updateFirst(query, update, Playground.class);
+
+        Aggregation agg = newAggregation(
+                match(where("id").is(playground.getId())),
+                unwind("rate"),
+                group("id")
+                        .first("name").as("name")
+                        .first("popularity").as("popularity")
+                        .first("date_added").as("date_added")
+                        .sum("rate.general_rate").as("rate")
+                        .count().as("num_rates")
+                        .sum("$rate.environment").as("environment")
+                        .sum("$rate.equipment").as("equipment")
+                        .sum("$rate.prices").as("prices")
+                        .sum("$rate.kids_supervision").as("kids_supervision"),
+                score()
+        );
+
+                AggregationResults<Playground> groupResults = mongo.aggregate(agg,Playground.class, Playground.class);
+                Playground playground1 = groupResults.getUniqueMappedResult();
+
+        Update update1 = new Update();
+        update1.set("popularity",playground1.getPopularity());
+        update1.set("general_rate", playground1.getGeneral_rate());
+        update1.set("general_environment",playground1.getGeneral_environment());
+        update1.set("general_equipment", playground1.getGeneral_equipment());
+        update1.set("general_prices", playground1.getGeneral_prices());
+        update1.set("general_kids_supervision", playground1.getGeneral_kids_supervision());
+        mongo.updateFirst(query,update1,Playground.class);
+
+        return playground;
+
     }
 
     @Override
-    public WriteResult updateRate(Playground playground, Rate rate) {
-        Criteria where = Criteria.where("id").is(playground.getId()).and("rate.user.username").is(rate.getUser().getUsername());
+    public Playground updateRate(Playground playground, Rate rate) {
+        Criteria where = where("id").is(playground.getId()).and("rate.user_id").is(rate.getUser());
         Query query = Query.query(where);
         Update update = new Update();
         update.set("rate.$.general_rate",rate.getGeneral_rate());
         update.set("rate.$.comment",rate.getComment());
-        return mongo.updateFirst(query, update, Playground.class);
+        update.set("rate.$.environment", rate.getEnvironment());
+        update.set("rate.$.equipment", rate.getEquipment());
+        update.set("rate.$.prices", rate.getPrices());
+        update.set("rate.$.kids_supervision", rate.getKids_supervision());
+        mongo.updateFirst(query, update, Playground.class);
+
+        Aggregation agg = newAggregation(
+                match(where("id").is(playground.getId())),
+                unwind("rate"),
+                group("id")
+                        .first("name").as("name")
+                        .first("popularity").as("popularity")
+                        .first("date_added").as("date_added")
+                        .sum("rate.general_rate").as("rate")
+                        .count().as("num_rates")
+                        .sum("$rate.environment").as("environment")
+                        .sum("$rate.equipment").as("equipment")
+                        .sum("$rate.prices").as("prices")
+                        .sum("$rate.kids_supervision").as("kids_supervision"),
+                score()
+        );
+
+        AggregationResults<Playground> groupResults = mongo.aggregate(agg,Playground.class, Playground.class);
+        Playground playground1 = groupResults.getUniqueMappedResult();
+
+        Update update1 = new Update();
+        update1.set("popularity",playground1.getPopularity());
+        update1.set("general_rate", playground1.getGeneral_rate());
+        update1.set("general_environment",playground1.getGeneral_environment());
+        update1.set("general_equipment", playground1.getGeneral_equipment());
+        update1.set("general_prices", playground1.getGeneral_prices());
+        update1.set("general_kids_supervision", playground1.getGeneral_kids_supervision());
+        mongo.updateFirst(query,update1,Playground.class);
+
+        return playground;
+
     }
 
 
@@ -55,21 +122,17 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     public List<GeneralRate> findByCityOrderByRate(String city) {
 
         Aggregation agg = newAggregation(
-                match(Criteria.where("city").is(city)),
-                unrate(),
-                unwind("rate"),
-                group("id").first("name").as("name").first("popularity").as("popularity").first("date_added").as("date_added").sum("rate.general_rate").as("rate").count().as("num_rates")
-                        .avg("$rate.environment").as("environment")
-                        .avg("$rate.equipment").as("equipment")
-                        .avg("$rate.prices").as("prices")
-                        .avg("$rate.kids_supervision").as("kids_supervision"),
-                score(),
-                //project("rate","name").and("_id").previousOperation().andExpression("rate * num_rates").as("popularity"),
+                match(where("city").is(city)),
+                group("id")
+                        .first("name").as("name")
+                        .first("popularity").as("popularity")
+                        //.first("date_added").as("date_added")
+                        .first("general_rate").as("rate"),
                 sort(Sort.Direction.DESC, "popularity")
 
         );
 
-        AggregationResults<GeneralRate> groupResults = mongo.aggregate(agg, Playground.class , GeneralRate.class);
+        AggregationResults<GeneralRate> groupResults = mongo.aggregate(agg, Playground.class, GeneralRate.class);
         List<GeneralRate> result = groupResults.getMappedResults();
 
         return result;
@@ -78,53 +141,86 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
 
     }
 
-    @Override
-    public List<GeneralRate> findUnRatePlaygrounds(String city) {
-        Aggregation agg = newAggregation(
-                match(Criteria.where("city").is(city).and("rate").size(0)),
-                project("name").and("rate")
-
-        );
-        AggregationResults<GeneralRate> groupResults = mongo.aggregate(agg, Playground.class , GeneralRate.class);
-        List<GeneralRate> result = groupResults.getMappedResults();
-
-        return result;
-    }
 
     @Override
     public List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance, String sort) {
         Distance distance=new Distance(maxDistance,Metrics.KILOMETERS);
-        Criteria where = Criteria.where("location").nearSphere(new GeoJsonPoint(longitude, latitude)).maxDistance(maxDistance);
+        //Criteria where = where("location").nearSphere(new GeoJsonPoint(longitude, latitude)).maxDistance(maxDistance);
         NearQuery query = NearQuery.near(longitude,latitude).maxDistance(distance).spherical(true);
+        query.num(100);
+
         //return mongo.find(query,Playground.class);
         Aggregation agg;
+
+        /*
+        Aggregation agg1 = newAggregation(geoNear(query,"distance"));
+        AggregationResults<LocationDistance> groupDistanceResults = mongo.aggregate(agg1, Playground.class , LocationDistance.class);
+        List<LocationDistance> distanceResults = groupDistanceResults.getMappedResults();
+        */
+
         if(sort.equals("popularity")) {
             agg = newAggregation(
                     geoNear(query, "distance"),
-                    unrate(),
-                    unwind("rate"),
-                    group("id").first("name").as("name").sum("$rate.general_rate").as("rate").count().as("num_rates"),
-                    //project("rate", "name").and("_id").previousOperation().andExpression("rate / num_rates").as("rate")
-                    score(),
+                    group("id")
+                            .first("name").as("name")
+                            .first("general_rate").as("rate")
+                            .first("popularity").as("popularity"),
                     sort(Sort.Direction.ASC, "popularity")
             );
         }else{
             agg = newAggregation(
                     geoNear(query, "distance"),
-                    unrate(),
-                    unwind("rate"),
-                    group("id").first("name").as("name").sum("$rate.general_rate").as("rate").count().as("num_rates"),
-                    project("rate", "name").and("_id").previousOperation().andExpression("rate / num_rates").as("rate")
+                    group("id")
+                            .first("name").as("name")
+                            .first("general_rate").as("rate")
             );
         }
 
         AggregationResults<GeneralRate> groupResults = mongo.aggregate(agg, Playground.class , GeneralRate.class);
         List<GeneralRate> result = groupResults.getMappedResults();
 
-
         return result;
 
 
+    }
+
+    @Override
+    public Playground addReport(Report report, Playground playground) {
+        Criteria where = where("id").is(playground.getId());
+        Query query = Query.query(where);
+        Update update = new Update();
+        update.push("reports",report);
+        mongo.updateFirst(query,update,Playground.class);
+        return playground;
+    }
+
+    @Override
+    public Rate findRate(String playground_id, String user_id) {
+
+        Criteria findPlaygroundCriteria = Criteria.where("name").is("Thess11qwe122");
+
+        Criteria findRateCriteria = Criteria.where("rate").elemMatch(Criteria.where("comment").is("Good"));
+
+        BasicQuery query = new BasicQuery(findPlaygroundCriteria.getCriteriaObject(), findRateCriteria.getCriteriaObject());
+
+        return mongo.findOne(query,Rate.class);
+    }
+
+    @Override
+    public GeneralRate getPlaygroundGeneral(String playground_id) {
+        Aggregation agg = newAggregation(
+                match(where("id").is(playground_id)),
+                group("id")
+                        .first("name").as("name")
+                        .first("popularity").as("popularity")
+                        .first("general_rate").as("rate")
+
+        );
+
+        AggregationResults<GeneralRate> groupResults = mongo.aggregate(agg, Playground.class, GeneralRate.class);
+        GeneralRate result = groupResults.getUniqueMappedResult();
+
+        return result;
     }
 
     private CustomGroupOperation popularity(){
@@ -181,15 +277,31 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         ).append(
                 "name","$name"
         ).append(
-                "environment","$environment"
+                "general_environment",new BasicDBObject(
+                        "$divide",new Object[]{
+                        "$environment","$num_rates"
+                }
+                )
         ).append(
-                "equipment","$equipment"
+                "general_equipment",new BasicDBObject(
+                        "$divide",new Object[]{
+                        "$equipment","$num_rates"
+                }
+                )
         ).append(
-                "prices","$prices"
+                "general_prices",new BasicDBObject(
+                        "$divide",new Object[]{
+                        "$prices","$num_rates"
+                }
+                )
         ).append(
-                "kids_supervision","$kids_supervision"
+                "general_kids_supervision",new BasicDBObject(
+                        "$divide",new Object[]{
+                        "$kids_supervision","$num_rates"
+                }
+                )
         ).append(
-                "rate",new BasicDBObject(
+                "general_rate",new BasicDBObject(
                         "$divide",new Object[]{
                         "$rate","$num_rates"
                 }
@@ -214,7 +326,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         "$divide",new Object[]{
                         new BasicDBObject(
                                 "$subtract",new Object[]{
-                                "new Date()","$date_added"
+                                new java.util.Date(),"$date_added"
                         }
                         ),86400000
                 }
@@ -235,6 +347,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                 "$ifNull", new Object[]{
                 "$rate", new Object[]{
                         "general_rate", 0
+                        ,"environment", 0
                 }
         })
         ));
@@ -257,4 +370,44 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         return new CustomGroupOperation(myProject);
     }
 
+    private class GeoNearOperationExt implements AggregationOperation {
+
+        private NearQuery nearQuery;
+
+        private String distanceField = "distance";
+
+        public GeoNearOperationExt(NearQuery nearQuery) {
+            this.nearQuery = nearQuery;
+        }
+
+        /**
+         * Default is distance
+         * @return
+         */
+        public String getDistanceField() {
+            return distanceField;
+        }
+
+        /**
+         * Set distanceField value Default is distance
+         * @param distanceField
+         */
+        public void setDistanceField(String distanceField) {
+            this.distanceField = distanceField;
+        }
+
+
+
+        @Override
+        public DBObject toDBObject(AggregationOperationContext context) {
+            DBObject dbObject = context.getMappedObject(nearQuery.toDBObject());
+            dbObject.put("distanceField", distanceField);
+            return new BasicDBObject("$geoNear", dbObject);
+        }
+    }
+
+
+
 }
+
+

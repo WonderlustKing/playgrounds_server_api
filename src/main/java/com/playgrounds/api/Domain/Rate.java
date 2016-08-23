@@ -9,9 +9,10 @@ import java.util.Date;
  * Created by christos on 15/5/2016.
  */
 
+
 public class Rate {
 
-    private User user;
+    private String user;
 
     private Date date;
 
@@ -29,11 +30,11 @@ public class Rate {
 
 
 
-    public User getUser() {
+    public String getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(String user) {
         this.user = user;
     }
 

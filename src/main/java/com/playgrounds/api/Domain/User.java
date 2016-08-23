@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by christos on 15/5/2016.
@@ -19,6 +21,8 @@ public class User {
     private String email;
 
     private URL imageUrl;
+
+    private List<Favorite> favorites = new ArrayList<Favorite>();
 
 
     public String getId() {
@@ -51,5 +55,13 @@ public class User {
 
     public void setImageUrl(URL imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public List<Favorite> getFavorites() {
+        return favorites;
+    }
+
+    public void setFavorites(List<Favorite> favorites) {
+        this.favorites = favorites;
     }
 }

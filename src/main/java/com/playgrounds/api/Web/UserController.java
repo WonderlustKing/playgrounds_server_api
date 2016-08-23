@@ -1,12 +1,15 @@
 package com.playgrounds.api.Web;
 
+import com.playgrounds.api.Domain.Favorite;
+import com.playgrounds.api.Domain.GeneralRate;
+import com.playgrounds.api.Domain.Playground;
 import com.playgrounds.api.Domain.User;
+import com.playgrounds.api.Repository.PlaygroundRepository;
 import com.playgrounds.api.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +24,12 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 public class UserController {
 
     private UserRepository userRepository;
+    private PlaygroundRepository playgroundRepository;
 
     @Autowired
-    public UserController(UserRepository userRepository){
+    public UserController(UserRepository userRepository, PlaygroundRepository playgroundRepository){
         this.userRepository = userRepository;
+        this.playgroundRepository = playgroundRepository;
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes="application/json")
@@ -50,14 +55,44 @@ public class UserController {
         return allUsers;
     }
 
-    @RequestMapping(value="/{username}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value="/{id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Resource<User> getUser(@PathVariable("username") String username){
-        User user = userRepository.findByUsername(username);
-        if(user == null) throw new UserNotFoundException(username);
+    public Resource<User> getUser(@PathVariable("id") String id){
+        User user = userRepository.findById(id);
+        if(user == null) throw new UserNotFoundException(id);
         Resource<User> resource = new Resource<User>(user);
         resource.add(linkTo(UserController.class).slash(user.getId()).withSelfRel());
         return resource;
+    }
+
+    @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.POST, consumes = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public HttpHeaders addFavorite(@RequestBody Favorite favorite, @PathVariable("user_id") String user_id){
+        Playground playground = playgroundRepository.findById(favorite.getPlayground());
+        if(playground == null) throw new PlaygroundNotFoundException(favorite.getPlayground());
+        userRepository.addFavorite(user_id,favorite);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(linkTo(UserController.class).slash(user_id).slash("favorites").toUri());
+        return headers;
+    }
+
+    @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<Resource<GeneralRate>> getUserFavorites(@PathVariable("user_id") String user_id){
+        User user = userRepository.findById(user_id);
+        List<GeneralRate> playgrounds_list = new ArrayList<GeneralRate>();
+        for(Favorite favorite : user.getFavorites()){
+            GeneralRate generalRate = playgroundRepository.getPlaygroundGeneral(favorite.getPlayground());
+            playgrounds_list.add(generalRate);
+        }
+        List<Resource<GeneralRate>> resources = new ArrayList<Resource<GeneralRate>>();
+        for(GeneralRate generalRate : playgrounds_list){
+            Resource<GeneralRate> resource = new Resource<GeneralRate>(generalRate);
+            resource.add(linkTo(PlaygroundController.class).slash(generalRate.getId()).withSelfRel());
+            resources.add(resource);
+        }
+
+        return resources;
     }
 
 

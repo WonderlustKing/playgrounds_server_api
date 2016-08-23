@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,15 +26,30 @@ public class Playground {
     @Indexed
     private Location location;
 
-    private int rates_num;
-
-    private List<Rate> rate = new ArrayList<Rate>();
-
-    private URL imageURL;
-
     private double popularity =0;
 
     private Date date_added;
+
+    private String added_by;
+
+    private URL imageURL;
+
+    private int rates_num;
+
+    private double general_rate =0;
+
+    private double general_environment =0;
+
+    private double general_equipment =0;
+
+    private double general_prices =0;
+
+    private double general_kids_supervision =0;
+
+    @Indexed
+    private LinkedList<Rate> rate = new LinkedList<Rate>();
+
+    private List<Report> reports = new ArrayList<Report>();
 
 
     public String getId() {
@@ -68,11 +84,11 @@ public class Playground {
         this.location = location;
     }
 
-    public List<Rate> getRate() {
+    public LinkedList<Rate> getRate() {
         return rate;
     }
 
-    public void setRate(List<Rate> rate) {
+    public void setRate(LinkedList<Rate> rate) {
         this.rate = rate;
     }
 
@@ -106,5 +122,61 @@ public class Playground {
 
     public void setRates_num(int rates_num) {
         this.rates_num = rates_num;
+    }
+
+    public String getAdded_by() {
+        return added_by;
+    }
+
+    public void setAdded_by(String added_by) {
+        this.added_by = added_by;
+    }
+
+    public List<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<Report> reports) {
+        this.reports = reports;
+    }
+
+    public double getGeneral_rate() {
+        return general_rate;
+    }
+
+    public void setGeneral_rate(double general_rate) {
+        this.general_rate = general_rate;
+    }
+
+    public double getGeneral_environment() {
+        return general_environment;
+    }
+
+    public void setGeneral_environment(double general_environment) {
+        this.general_environment = general_environment;
+    }
+
+    public double getGeneral_equipment() {
+        return general_equipment;
+    }
+
+    public void setGeneral_equipment(double general_equipment) {
+        this.general_equipment = general_equipment;
+    }
+
+    public double getGeneral_prices() {
+        return general_prices;
+    }
+
+    public void setGeneral_prices(double general_prices) {
+        this.general_prices = general_prices;
+    }
+
+    public double getGeneral_kids_supervision() {
+        return general_kids_supervision;
+    }
+
+    public void setGeneral_kids_supervision(double general_kids_supervision) {
+        this.general_kids_supervision = general_kids_supervision;
     }
 }
