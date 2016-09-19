@@ -1,5 +1,7 @@
 package com.playgrounds.api.Web;
 
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSInputFile;
 import com.playgrounds.api.Domain.*;
 import com.playgrounds.api.Repository.PlaygroundRepository;
 import com.playgrounds.api.Repository.UserRepository;
@@ -10,7 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.*;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -120,7 +126,7 @@ public class PlaygroundController {
         return allPlaygrounds;
     }
 
-    @RequestMapping(value = "/{city_name}/{playground_name}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/search/{city_name}/{playground_name}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Resource<Playground> getPlayground(@PathVariable("city_name") String city, @PathVariable("playground_name") String name){
         Playground playground = playgroundRepository.findByCityIgnoreCaseAndNameIgnoreCase(city,name);
@@ -164,5 +170,13 @@ public class PlaygroundController {
             resource.add(linkTo(PlaygroundController.class).slash("rate").slash(playground_id).slash(user_id).withSelfRel());
             return resource;
 
+    }
+
+    @RequestMapping(value = "/upload/{playground_id}", method = RequestMethod.POST, produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public HttpHeaders uploadImage(@PathVariable("playground_id") String playground_id, @RequestParam(value="file") MultipartFile image){
+        if(image != null) playgroundRepository.uploadImage(image);
+
+        return new HttpHeaders();
     }
 }

@@ -2,7 +2,6 @@ package com.playgrounds.api.Config;
 
 import com.playgrounds.api.Repository.UserRepository;
 import com.playgrounds.api.Repository.UserService;
-import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

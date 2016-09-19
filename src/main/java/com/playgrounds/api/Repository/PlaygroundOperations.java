@@ -8,6 +8,7 @@ import com.playgrounds.api.Domain.Report;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
 import java.util.List;
@@ -28,4 +29,5 @@ public interface PlaygroundOperations {
     Playground addReport(Report report, Playground playground);
     Rate findRate(String playground_id, String user_id);
     GeneralRate getPlaygroundGeneral(String playground_id);
+    boolean uploadImage(MultipartFile file);
 }

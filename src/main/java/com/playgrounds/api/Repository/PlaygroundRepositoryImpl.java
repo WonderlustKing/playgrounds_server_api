@@ -3,10 +3,15 @@ package com.playgrounds.api.Repository;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSInputFile;
+import com.playgrounds.api.Config.MongoConfig;
 import com.playgrounds.api.CustomGroupOperation;
 import com.playgrounds.api.Domain.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.*;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -16,9 +21,13 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperationCon
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.query.*;
+import org.springframework.data.mongodb.gridfs.GridFsOperations;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
 import java.awt.Point;
+import java.io.*;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
@@ -31,6 +40,9 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
 
     @Autowired
     private MongoOperations mongo;
+
+    @Autowired
+    private GridFsTemplate gridFsTemplate;
 
     @Override
     public Playground addRate(Playground playground, Rate rate) {
@@ -222,6 +234,40 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
 
         return result;
     }
+
+    @Override
+    public boolean uploadImage(MultipartFile file) {
+
+        ApplicationContext ctx =
+                new AnnotationConfigApplicationContext(MongoConfig.class);
+        GridFsOperations gridOperations =
+                (GridFsOperations) ctx.getBean("gridFsTemplate");
+
+        try {
+            byte[] bytes = file.getBytes();
+            InputStream bis = new ByteArrayInputStream(bytes);
+            //InputStream bis = new FileInputStream("src/main/resources/TestFile.txt");
+            //BufferedOutputStream stream =
+              //      new BufferedOutputStream(new FileOutputStream(new File("name")));
+            //stream.write(bytes);
+            //stream.close();
+
+            //GridFS gfsPhoto = new GridFS()
+            //GridFSInputFile gfsFile = gfsPhoto.createFile(bytes);
+            //gfsFile.setFilename("FileName");
+            //gfsFile.save();
+            DBObject metaData = new BasicDBObject();
+            metaData.put("user", "Chris");
+            gridOperations.store(bis,"file.txt","text/plain",metaData);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+
 
     private CustomGroupOperation popularity(){
         DBObject myProject = (DBObject)new BasicDBObject(
