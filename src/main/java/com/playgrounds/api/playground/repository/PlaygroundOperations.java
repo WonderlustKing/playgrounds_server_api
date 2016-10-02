@@ -1,16 +1,15 @@
-package com.playgrounds.api.Repository;
+package com.playgrounds.api.playground.repository;
 
 import com.mongodb.WriteResult;
-import com.playgrounds.api.Domain.GeneralRate;
-import com.playgrounds.api.Domain.Playground;
-import com.playgrounds.api.Domain.Rate;
-import com.playgrounds.api.Domain.Report;
+import com.playgrounds.api.playground.model.GeneralRate;
+import com.playgrounds.api.playground.model.Playground;
+import com.playgrounds.api.playground.model.Rate;
+import com.playgrounds.api.playground.model.Report;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -29,5 +28,7 @@ public interface PlaygroundOperations {
     Playground addReport(Report report, Playground playground);
     Rate findRate(String playground_id, String user_id);
     GeneralRate getPlaygroundGeneral(String playground_id);
-    boolean uploadImage(MultipartFile file);
+    String uploadImage(String playground_id,String user_id,String fileName, MultipartFile file);
+    WriteResult updateImageField(String playground_id, String image_id);
+    InputStream findImageById(String image_id);
 }

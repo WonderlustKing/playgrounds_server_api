@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/playgrounds_server.iml" filepath="$PROJECT_DIR$/playgrounds_server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/playgrounds_server_api.iml" filepath="$PROJECT_DIR$/.idea/modules/playgrounds_server_api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/playgrounds_server_api_main.iml" filepath="$PROJECT_DIR$/.idea/modules/playgrounds_server_api_main.iml" group="playgrounds_server_api" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/playgrounds_server_api_test.iml" filepath="$PROJECT_DIR$/.idea/modules/playgrounds_server_api_test.iml" group="playgrounds_server_api" />
     </modules>
   </component>
 </project>

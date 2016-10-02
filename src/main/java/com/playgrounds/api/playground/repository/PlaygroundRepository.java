@@ -1,8 +1,6 @@
-package com.playgrounds.api.Repository;
+package com.playgrounds.api.playground.repository;
 
-import com.playgrounds.api.Domain.GeneralRate;
-import com.playgrounds.api.Domain.Playground;
-import com.playgrounds.api.Domain.Rate;
+import com.playgrounds.api.playground.model.Playground;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.repository.MongoRepository;

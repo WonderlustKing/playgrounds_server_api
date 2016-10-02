@@ -1,4 +1,4 @@
-package com.playgrounds.api.Web;
+package com.playgrounds.api.playground.web;
 
 /**
  * Created by christos on 23/5/2016.

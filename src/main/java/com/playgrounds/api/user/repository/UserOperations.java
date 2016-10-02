@@ -1,7 +1,7 @@
-package com.playgrounds.api.Repository;
+package com.playgrounds.api.user.repository;
 
 import com.mongodb.WriteResult;
-import com.playgrounds.api.Domain.Favorite;
+import com.playgrounds.api.user.model.Favorite;
 import org.springframework.cache.annotation.CachePut;
 
 /**

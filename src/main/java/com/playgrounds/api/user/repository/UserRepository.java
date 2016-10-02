@@ -1,6 +1,7 @@
-package com.playgrounds.api.Repository;
+package com.playgrounds.api.user.repository;
 
-import com.playgrounds.api.Domain.User;
+import com.playgrounds.api.user.model.User;
+import com.playgrounds.api.user.repository.UserOperations;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

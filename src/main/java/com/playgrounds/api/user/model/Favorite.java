@@ -1,4 +1,4 @@
-package com.playgrounds.api.Domain;
+package com.playgrounds.api.user.model;
 
 /**
  * Created by christos on 22/8/2016.

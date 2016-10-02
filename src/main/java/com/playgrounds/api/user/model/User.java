@@ -1,5 +1,6 @@
-package com.playgrounds.api.Domain;
+package com.playgrounds.api.user.model;
 
+import com.playgrounds.api.user.model.Favorite;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

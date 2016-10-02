@@ -1,9 +1,10 @@
-package com.playgrounds.api.Domain;
+package com.playgrounds.api.playground.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotNull;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,8 +20,10 @@ public class Playground {
     @Id
     private String id;
 
+    @NotNull
     private String name;
 
+    @NotNull
     private String city;
 
     @Indexed
@@ -30,11 +33,14 @@ public class Playground {
 
     private Date date_added;
 
+    @NotNull
     private String added_by;
 
     private URL imageURL;
 
-    private int rates_num;
+    private List<String> images = new ArrayList<String>();
+
+    private int rates_num =0;
 
     private double general_rate =0;
 
@@ -178,5 +184,13 @@ public class Playground {
 
     public void setGeneral_kids_supervision(double general_kids_supervision) {
         this.general_kids_supervision = general_kids_supervision;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 }

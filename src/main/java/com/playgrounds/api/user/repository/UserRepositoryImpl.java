@@ -1,8 +1,9 @@
-package com.playgrounds.api.Repository;
+package com.playgrounds.api.user.repository;
 
 import com.mongodb.WriteResult;
-import com.playgrounds.api.Domain.Favorite;
-import com.playgrounds.api.Domain.User;
+import com.playgrounds.api.user.model.Favorite;
+import com.playgrounds.api.user.model.User;
+import com.playgrounds.api.user.repository.UserOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;

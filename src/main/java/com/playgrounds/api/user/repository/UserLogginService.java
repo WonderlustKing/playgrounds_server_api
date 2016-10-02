@@ -1,6 +1,7 @@
-package com.playgrounds.api.Repository;
+package com.playgrounds.api.user.repository;
 
-import com.playgrounds.api.Domain.User;
+import com.playgrounds.api.user.model.User;
+import com.playgrounds.api.user.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,10 +14,10 @@ import java.util.List;
 /**
  * Created by christos on 4/8/2016.
  */
-public class UserService implements UserDetailsService {
+public class UserLogginService implements UserDetailsService {
     private UserRepository userRepository;
 
-    public UserService(UserRepository userRepository){
+    public UserLogginService(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 

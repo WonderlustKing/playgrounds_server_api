@@ -1,11 +1,13 @@
-package com.playgrounds.api.Web;
+package com.playgrounds.api.user.web;
 
-import com.playgrounds.api.Domain.Favorite;
-import com.playgrounds.api.Domain.GeneralRate;
-import com.playgrounds.api.Domain.Playground;
-import com.playgrounds.api.Domain.User;
-import com.playgrounds.api.Repository.PlaygroundRepository;
-import com.playgrounds.api.Repository.UserRepository;
+import com.playgrounds.api.playground.model.GeneralRate;
+import com.playgrounds.api.playground.model.Playground;
+import com.playgrounds.api.playground.repository.PlaygroundRepository;
+import com.playgrounds.api.playground.web.PlaygroundController;
+import com.playgrounds.api.playground.web.PlaygroundNotFoundException;
+import com.playgrounds.api.user.repository.UserRepository;
+import com.playgrounds.api.user.model.Favorite;
+import com.playgrounds.api.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;

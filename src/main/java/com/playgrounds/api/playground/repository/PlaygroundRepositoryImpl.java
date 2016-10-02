@@ -1,14 +1,16 @@
-package com.playgrounds.api.Repository;
+package com.playgrounds.api.playground.repository;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
-import com.mongodb.gridfs.GridFS;
-import com.mongodb.gridfs.GridFSInputFile;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSFile;
 import com.playgrounds.api.Config.MongoConfig;
 import com.playgrounds.api.CustomGroupOperation;
-import com.playgrounds.api.Domain.*;
-import org.bson.types.ObjectId;
+import com.playgrounds.api.playground.model.Playground;
+import com.playgrounds.api.playground.model.Rate;
+import com.playgrounds.api.playground.model.GeneralRate;
+import com.playgrounds.api.playground.model.Report;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -19,14 +21,11 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperationContext;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.query.*;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
-import java.awt.Point;
 import java.io.*;
 import java.util.List;
 
@@ -50,7 +49,9 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         Query query = Query.query(where);
         Update update = new Update();
         update.push("rate",rate);
+        update.set("rates_num",playground.getRate().size());
         mongo.updateFirst(query, update, Playground.class);
+
 
         Aggregation agg = newAggregation(
                 match(where("id").is(playground.getId())),
@@ -81,7 +82,6 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         mongo.updateFirst(query,update1,Playground.class);
 
         return playground;
-
     }
 
     @Override
@@ -209,7 +209,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     @Override
     public Rate findRate(String playground_id, String user_id) {
 
-        Criteria findPlaygroundCriteria = Criteria.where("name").is("Thess11qwe122");
+        Criteria findPlaygroundCriteria = Criteria.where("id").is(playground_id);
 
         Criteria findRateCriteria = Criteria.where("rate").elemMatch(Criteria.where("comment").is("Good"));
 
@@ -236,13 +236,13 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     }
 
     @Override
-    public boolean uploadImage(MultipartFile file) {
+    public String uploadImage(String playground_id, String user_id, String fileName, MultipartFile file) {
 
         ApplicationContext ctx =
                 new AnnotationConfigApplicationContext(MongoConfig.class);
         GridFsOperations gridOperations =
                 (GridFsOperations) ctx.getBean("gridFsTemplate");
-
+        String result = null;
         try {
             byte[] bytes = file.getBytes();
             InputStream bis = new ByteArrayInputStream(bytes);
@@ -257,16 +257,40 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
             //gfsFile.setFilename("FileName");
             //gfsFile.save();
             DBObject metaData = new BasicDBObject();
+            metaData.put("playground",playground_id);
             metaData.put("user", "Chris");
-            gridOperations.store(bis,"file.txt","text/plain",metaData);
+            GridFSFile upload_image = gridOperations.store(bis,fileName,"image/jpeg",metaData);
+            result = upload_image.getId().toString();
 
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return result;
         }
-        return true;
+        return result;
     }
 
+    @Override
+    public WriteResult updateImageField(String playground_id, String image_id) {
+        Criteria where = where("id").is(playground_id);
+        Query query = Query.query(where);
+        Update update = new Update();
+        update.push("images",image_id);
+        WriteResult result = mongo.updateFirst(query,update,Playground.class);
+        return result;
+    }
+
+    @Override
+    public InputStream findImageById(String image_id) {
+        ApplicationContext ctx =
+                new AnnotationConfigApplicationContext(MongoConfig.class);
+        GridFsOperations gridOperations =
+                (GridFsOperations) ctx.getBean("gridFsTemplate");
+
+        GridFSDBFile result = gridOperations.findOne(new Query().addCriteria(Criteria.where("_id").is(image_id)));
+        if(result == null ) return null;
+        return result.getInputStream();
+
+    }
 
 
     private CustomGroupOperation popularity(){

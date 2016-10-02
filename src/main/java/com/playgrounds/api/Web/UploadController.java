@@ -1,7 +1,6 @@
 package com.playgrounds.api.Web;
 
-import com.playgrounds.api.Repository.PlaygroundRepository;
-import com.playgrounds.api.Repository.UserRepository;
+import com.playgrounds.api.playground.repository.PlaygroundRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,7 @@ public class UploadController {
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public HttpHeaders uploadImage(@RequestParam(value="file") MultipartFile image){
-        if(image != null) playgroundRepository.uploadImage(image);
+        //if(image != null) playgroundRepository.uploadImage(image);
 
         return new HttpHeaders();
     }
