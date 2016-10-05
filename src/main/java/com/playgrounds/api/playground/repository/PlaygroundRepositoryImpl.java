@@ -5,15 +5,11 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
-import com.playgrounds.api.Config.MongoConfig;
-import com.playgrounds.api.CustomGroupOperation;
 import com.playgrounds.api.playground.model.Playground;
 import com.playgrounds.api.playground.model.Rate;
 import com.playgrounds.api.playground.model.GeneralRate;
 import com.playgrounds.api.playground.model.Report;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.*;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -23,10 +19,11 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperationCon
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.*;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
-import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
@@ -41,7 +38,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     private MongoOperations mongo;
 
     @Autowired
-    private GridFsTemplate gridFsTemplate;
+    private GridFsOperations gridOperations;
 
     @Override
     public Playground addRate(Playground playground, Rate rate) {
@@ -238,10 +235,10 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     @Override
     public String uploadImage(String playground_id, String user_id, String fileName, MultipartFile file) {
 
-        ApplicationContext ctx =
-                new AnnotationConfigApplicationContext(MongoConfig.class);
-        GridFsOperations gridOperations =
-                (GridFsOperations) ctx.getBean("gridFsTemplate");
+        //ApplicationContext ctx =
+         //       new AnnotationConfigApplicationContext(MongoConfig.class);
+       // GridFsOperations gridOperations =
+         //       (GridFsOperations) ctx.getBean("gridFsTemplate");
         String result = null;
         try {
             byte[] bytes = file.getBytes();
@@ -270,21 +267,32 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     }
 
     @Override
-    public WriteResult updateImageField(String playground_id, String image_id) {
-        Criteria where = where("id").is(playground_id);
+    public WriteResult updateImageField(Playground playground, URL imageURL){
+        Criteria where = where("id").is(playground.getId());
         Query query = Query.query(where);
         Update update = new Update();
-        update.push("images",image_id);
+        update.push("images",imageURL);
         WriteResult result = mongo.updateFirst(query,update,Playground.class);
         return result;
     }
 
     @Override
+    public WriteResult addImageProfile(Playground playground, URL imageURL) throws MalformedURLException {
+        Criteria where = where("id").is(playground.getId());
+        Query query = Query.query(where);
+        Update update = new Update();
+        update.set("imageURL",imageURL);
+        WriteResult result = mongo.updateFirst(query,update,Playground.class);
+        return result;
+    }
+
+
+    @Override
     public InputStream findImageById(String image_id) {
-        ApplicationContext ctx =
-                new AnnotationConfigApplicationContext(MongoConfig.class);
-        GridFsOperations gridOperations =
-                (GridFsOperations) ctx.getBean("gridFsTemplate");
+        //ApplicationContext ctx =
+          //      new AnnotationConfigApplicationContext(MongoConfig.class);
+        //GridFsOperations gridOperations =
+        //        (GridFsOperations) ctx.getBean("gridFsTemplate");
 
         GridFSDBFile result = gridOperations.findOne(new Query().addCriteria(Criteria.where("_id").is(image_id)));
         if(result == null ) return null;

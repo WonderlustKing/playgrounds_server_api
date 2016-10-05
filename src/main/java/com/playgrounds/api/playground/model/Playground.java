@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,9 +37,9 @@ public class Playground {
     @NotNull
     private String added_by;
 
-    private URL imageURL;
+    private URL imageURL = new URL("http://localhost:8080/playgrounds/images/default.jpg");
 
-    private List<String> images = new ArrayList<String>();
+    private List<URL> images = new ArrayList<URL>();
 
     private int rates_num =0;
 
@@ -56,6 +57,9 @@ public class Playground {
     private LinkedList<Rate> rate = new LinkedList<Rate>();
 
     private List<Report> reports = new ArrayList<Report>();
+
+    public Playground() throws MalformedURLException {
+    }
 
 
     public String getId() {
@@ -186,11 +190,11 @@ public class Playground {
         this.general_kids_supervision = general_kids_supervision;
     }
 
-    public List<String> getImages() {
+    public List<URL> getImages() {
         return images;
     }
 
-    public void setImages(List<String> images) {
+    public void setImages(List<URL> images) {
         this.images = images;
     }
 }

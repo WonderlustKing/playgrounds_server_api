@@ -6,6 +6,7 @@ import com.playgrounds.api.playground.model.Rate;
 import com.playgrounds.api.playground.model.Report;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -20,6 +21,7 @@ public interface PlaygroundService {
     Playground getPlaygroundByCityAndByName(String city, String name);
     List<GeneralRate> nearByPlaygrounds(double latitude, double longitude, int maxDistance, String sortBy);
     Playground reportPlayground(String playground_id, Report report);
-    boolean addImageToPlayground(String playground_id, String user_id, MultipartFile image);
+    boolean addImageToPlayground(String playground_id, String user_id, MultipartFile image) throws MalformedURLException;
     byte[] getImage(String image_id);
+    GeneralRate getGeneralRate(String playground_id);
 }

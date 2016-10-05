@@ -6,6 +6,8 @@ import com.playgrounds.api.playground.model.Report;
 import com.playgrounds.api.playground.web.PlaygroundNotFoundException;
 import com.playgrounds.api.user.web.UserRateExistException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.ListIterator;
 
@@ -14,8 +16,8 @@ import java.util.ListIterator;
  */
 public class PlaygroundInteractor {
     private Playground playground;
+    private final static String hostURL = "http://localhost:8080/playgrounds/images/";
     //private PlaygroundService service;
-
     public PlaygroundInteractor(){
     }
 
@@ -54,8 +56,12 @@ public class PlaygroundInteractor {
         playground.getReports().add(report);
     }
 
-    public void addImage(Playground playground, String image_id){
-        playground.getImages().add(image_id);
+    public URL addImage(Playground playground, String image_id) throws MalformedURLException {
+        String imagePath = hostURL+image_id;
+        URL imageURL = new URL(imagePath);
+        playground.getImages().add(imageURL);
+        if(playground.getImageURL() == null) playground.setImageURL(imageURL);
+        return imageURL;
     }
 
     public String uploadedImageName(Playground playground){

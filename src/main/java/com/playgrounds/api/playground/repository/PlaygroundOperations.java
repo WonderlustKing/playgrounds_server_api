@@ -10,6 +10,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -29,6 +31,7 @@ public interface PlaygroundOperations {
     Rate findRate(String playground_id, String user_id);
     GeneralRate getPlaygroundGeneral(String playground_id);
     String uploadImage(String playground_id,String user_id,String fileName, MultipartFile file);
-    WriteResult updateImageField(String playground_id, String image_id);
+    WriteResult updateImageField(Playground playground, URL imageURL) throws MalformedURLException;
+    WriteResult addImageProfile(Playground playground, URL imageURL) throws MalformedURLException;
     InputStream findImageById(String image_id);
 }

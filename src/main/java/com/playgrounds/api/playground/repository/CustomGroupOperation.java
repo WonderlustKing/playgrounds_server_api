@@ -1,4 +1,4 @@
-package com.playgrounds.api;
+package com.playgrounds.api.playground.repository;
 
 import com.mongodb.DBObject;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;

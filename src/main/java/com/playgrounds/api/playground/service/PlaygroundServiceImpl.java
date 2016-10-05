@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -85,15 +87,24 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public boolean addImageToPlayground(String playground_id, String user_id, MultipartFile image) {
+    public boolean addImageToPlayground(String playground_id, String user_id, MultipartFile image) throws MalformedURLException {
         if(image == null) throw new RuntimeException("Cant upload null image");
         Playground playground = repository.findById(playground_id);
         if(playground == null) throw new PlaygroundNotFoundException(playground_id);
         String fileName = interactor.uploadedImageName(playground);
         String uploaded_image_id = repository.uploadImage(playground_id, user_id, fileName, image);
-        interactor.addImage(playground,uploaded_image_id);
-        repository.updateImageField(playground_id,uploaded_image_id);
+        URL imageUrl = interactor.addImage(playground,uploaded_image_id);
+        repository.updateImageField(playground,imageUrl);
+        if(playground.getImages().size() == 1) repository.addImageProfile(playground,imageUrl);
         return true;
+    }
+
+    @Override
+    public GeneralRate getGeneralRate(String playground_id) {
+        Playground playground = repository.findById(playground_id);
+        if(playground == null) throw new PlaygroundNotFoundException(playground_id);
+        GeneralRate generalRate = repository.getPlaygroundGeneral(playground_id);
+        return generalRate;
     }
 
     @Override

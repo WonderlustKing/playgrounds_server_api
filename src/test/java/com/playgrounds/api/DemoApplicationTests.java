@@ -62,17 +62,17 @@ public class DemoApplicationTests {
 
 	@Test
 	public void test(){
-		RestAssured.authentication = basic("57ed189a9a15cfb595c302c5", "password");
+		RestAssured.authentication = basic("57f41111e83c23039372ffe6", "password");
 
 		final File file = new File("src/main/resources/city-logo.jpg");
 		assertNotNull(file);
 		assertTrue(file.canRead());
 		given().
-				param("user","57ed189a9a15cfb595c302c5").
+				param("user","57f41111e83c23039372ffe6").
 				multiPart(file).
 				expect().body(equalTo("Image upload successfully")).
 				when().
-				post("/playgrounds/upload/57ed2f959a15154cb247dd64");
+				post("/playgrounds/upload/57f55d7c248f435e3fa229c5");
 	}
 
 }

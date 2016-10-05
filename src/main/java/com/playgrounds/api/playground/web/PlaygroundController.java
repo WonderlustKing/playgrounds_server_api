@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
 import java.util.*;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -127,7 +128,7 @@ public class PlaygroundController {
 
     @RequestMapping(value = "/upload/{playground_id}", method = RequestMethod.POST, produces = "text/plain")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadImage(@PathVariable("playground_id") String playground_id,@RequestParam(value = "user") String user_id, @RequestParam(value="file") MultipartFile image){
+    public String uploadImage(@PathVariable("playground_id") String playground_id,@RequestParam(value = "user") String user_id, @RequestParam(value="file") MultipartFile image) throws MalformedURLException {
         userService.userExist(user_id);
         playgroundService.addImageToPlayground(playground_id,user_id,image);
         return "Image upload successfully";
