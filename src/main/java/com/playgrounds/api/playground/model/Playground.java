@@ -37,7 +37,7 @@ public class Playground {
     @NotNull
     private String added_by;
 
-    private URL imageURL = new URL("http://localhost:8080/playgrounds/images/default.jpg");
+    private URL imageURL = new URL("http://localhost:8080/playgrounds/images/580fafc50691c28141a8d091");
 
     private List<URL> images = new ArrayList<URL>();
 

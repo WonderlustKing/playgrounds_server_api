@@ -6,6 +6,9 @@ import com.playgrounds.api.playground.model.Report;
 import com.playgrounds.api.playground.web.PlaygroundNotFoundException;
 import com.playgrounds.api.user.web.UserRateExistException;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
@@ -25,7 +28,18 @@ public class PlaygroundInteractor {
         if(pl.getName().isEmpty()) throw new RuntimeException("Name can't be empty");
         if(pl.getCity().isEmpty()) throw new RuntimeException("City name can't be empty");
         if(pl.getAdded_by().isEmpty()) throw new RuntimeException("Added_by user can't be empty");
+        if(!testImage(pl.getImageURL())) throw new RuntimeException("Not valid image file");
         //service.create(pl);
+    }
+
+    private boolean testImage(URL image){
+        try{
+            BufferedImage testingImage = ImageIO.read(image);
+            if(testingImage != null) return true;
+            else return false;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public void addRate(Playground playground, Rate rate){

@@ -136,7 +136,8 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         .first("name").as("name")
                         .first("popularity").as("popularity")
                         //.first("date_added").as("date_added")
-                        .first("general_rate").as("rate"),
+                        .first("general_rate").as("rate")
+                        .first("imageURL").as("image"),
                 sort(Sort.Direction.DESC, "popularity")
 
         );
