@@ -27,6 +27,9 @@ public class Playground {
     @NotNull
     private String city;
 
+    @NotNull
+    private String address;
+
     @Indexed
     private Location location;
 
@@ -37,7 +40,7 @@ public class Playground {
     @NotNull
     private String added_by;
 
-    private URL imageURL = new URL("http://localhost:8080/playgrounds/images/580fafc50691c28141a8d091");
+    private URL imageURL = new URL("http://83.212.122.113:8080/playgrounds/images/58148adecce2c09ffda9d1c8");
 
     private List<URL> images = new ArrayList<URL>();
 
@@ -57,6 +60,8 @@ public class Playground {
     private LinkedList<Rate> rate = new LinkedList<Rate>();
 
     private List<Report> reports = new ArrayList<Report>();
+
+    private String distance;
 
     public Playground() throws MalformedURLException {
     }
@@ -84,6 +89,14 @@ public class Playground {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public Location getLocation() {

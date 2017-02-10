@@ -11,16 +11,17 @@ public class GeneralRate {
     private String name;
     private double rate =0;
     private URL image;
-    private double distance;
+    private Double distance = null;
 
     public GeneralRate(){
     }
 
-    public GeneralRate(String id, String name, double rate, URL image){
+    public GeneralRate(String id, String name, double rate, URL image, Double distance){
         this.id = id;
         this.name = name;
         this.rate = rate;
         this.image = image;
+        this.distance = distance;
     }
 
 
@@ -54,5 +55,13 @@ public class GeneralRate {
 
     public void setImage(URL image) {
         this.image = image;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 }

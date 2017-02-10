@@ -9,8 +9,9 @@ import java.util.List;
  * Created by chris on 30/9/2016.
  */
 public interface UserService {
-    User addUser(User userToAdd);
-    User userExist(String user_id);
+    User addUserIfNotExist(User userToAdd);
+    void userExist(String user_id);
+    User getUser(String user_id);
     List<User> getAllUsers();
     void addFavorite(String user_id, Favorite favorite);
 }

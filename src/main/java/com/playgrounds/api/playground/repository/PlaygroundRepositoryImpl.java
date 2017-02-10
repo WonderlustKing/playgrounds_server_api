@@ -5,13 +5,11 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
-import com.playgrounds.api.playground.model.Playground;
-import com.playgrounds.api.playground.model.Rate;
-import com.playgrounds.api.playground.model.GeneralRate;
-import com.playgrounds.api.playground.model.Report;
+import com.playgrounds.api.playground.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.*;
+import org.springframework.data.geo.Distance;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
@@ -135,6 +133,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                 group("id")
                         .first("name").as("name")
                         .first("popularity").as("popularity")
+                        //.first("location.coordinates").as("coordinates")
                         //.first("date_added").as("date_added")
                         .first("general_rate").as("rate")
                         .first("imageURL").as("image"),
@@ -147,17 +146,14 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
 
         return result;
 
-
-
     }
-
 
     @Override
     public List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance, String sort) {
         Distance distance=new Distance(maxDistance,Metrics.KILOMETERS);
         //Criteria where = where("location").nearSphere(new GeoJsonPoint(longitude, latitude)).maxDistance(maxDistance);
         NearQuery query = NearQuery.near(longitude,latitude).maxDistance(distance).spherical(true);
-        query.num(100);
+        query.num(25);
 
         //return mongo.find(query,Playground.class);
         Aggregation agg;
@@ -172,17 +168,24 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
             agg = newAggregation(
                     geoNear(query, "distance"),
                     group("id")
+                            .addToSet("distance").as("distance")
                             .first("name").as("name")
                             .first("general_rate").as("rate")
-                            .first("popularity").as("popularity"),
+                            //.first("location.coordinates").as("coordinates")
+                            .first("popularity").as("popularity")
+                            .first("imageURL").as("image"),
                     sort(Sort.Direction.ASC, "popularity")
             );
         }else{
             agg = newAggregation(
                     geoNear(query, "distance"),
                     group("id")
+                            .addToSet("distance").as("distance")
                             .first("name").as("name")
                             .first("general_rate").as("rate")
+                            //.first("location.coordinates").as("coordinates")
+                            .first("imageURL").as("image"),
+                    sort(Sort.Direction.DESC, "distance")
             );
         }
 
@@ -192,6 +195,19 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         return result;
 
 
+    }
+
+    @Override
+    public List<PlaygroundToMap> findAllPlaygroundsToMap() {
+        Aggregation aggregation = newAggregation(
+                group("id")
+                .first("name").as("name")
+                .first("location.coordinates").as("coordinates")
+        );
+
+        AggregationResults<PlaygroundToMap> results = mongo.aggregate(aggregation, Playground.class, PlaygroundToMap.class);
+        List<PlaygroundToMap> playgroundToMapsList = results.getMappedResults();
+        return playgroundToMapsList;
     }
 
     @Override
@@ -224,6 +240,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         .first("name").as("name")
                         .first("popularity").as("popularity")
                         .first("general_rate").as("rate")
+                        //.first("location.coordinates").as("coordinates")
 
         );
 
@@ -257,7 +274,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
             DBObject metaData = new BasicDBObject();
             metaData.put("playground",playground_id);
             metaData.put("user", "Chris");
-            GridFSFile upload_image = gridOperations.store(bis,fileName,"image/jpeg",metaData);
+            GridFSFile upload_image = gridOperations.store(bis,fileName,"image/jpeg");
             result = upload_image.getId().toString();
 
         } catch (Exception e) {
@@ -447,6 +464,11 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         ))
         );
         return new CustomGroupOperation(myProject);
+    }
+
+    private GeoNearOperationExt projectNEAR(){
+        NearQuery near = null;
+        return new GeoNearOperationExt(near);
     }
 
     private class GeoNearOperationExt implements AggregationOperation {

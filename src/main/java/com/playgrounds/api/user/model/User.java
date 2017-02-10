@@ -25,7 +25,6 @@ public class User {
 
     private List<Favorite> favorites = new ArrayList<Favorite>();
 
-
     public String getId() {
         return id;
     }

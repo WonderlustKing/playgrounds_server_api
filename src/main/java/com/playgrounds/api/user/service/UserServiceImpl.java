@@ -23,15 +23,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addUser(User userToAdd) {
+    public User addUserIfNotExist(User userToAdd) {
+        User alreadyExist = repository.findByEmail(userToAdd.getEmail());
+        if(alreadyExist != null) {
+            return alreadyExist;
+        }
         return repository.save(userToAdd);
     }
 
     @Override
-    public User userExist(String user_id) {
+    public User getUser(String user_id) {
         User user =repository.findById(user_id);
-        if (user == null) throw new UserNotFoundException(user_id);
+        if (user == null) {
+            throw new UserNotFoundException(user_id);
+        }
         return user;
+    }
+
+    @Override
+    public void userExist(String user_id) {
+        User user =repository.findById(user_id);
+        if (user == null) {
+            throw new UserNotFoundException(user_id);
+        }
     }
 
     @Override

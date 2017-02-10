@@ -17,6 +17,4 @@ public interface PlaygroundRepository extends MongoRepository<Playground,String>
     Playground findByCityIgnoreCaseAndNameIgnoreCase(String city, String name);
     @CachePut(value = "playgroundsCache", key = "#result.id")
     Playground save(Playground playground);
-
-
 }

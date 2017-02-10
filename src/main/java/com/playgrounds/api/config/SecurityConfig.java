@@ -1,4 +1,4 @@
-package com.playgrounds.api.Config;
+package com.playgrounds.api.config;
 
 import com.playgrounds.api.user.repository.UserRepository;
 import com.playgrounds.api.user.repository.UserLogginService;

@@ -2,11 +2,8 @@ package com.playgrounds.api.user.web;
 
 import com.playgrounds.api.playground.model.GeneralRate;
 import com.playgrounds.api.playground.model.Playground;
-import com.playgrounds.api.playground.repository.PlaygroundRepository;
 import com.playgrounds.api.playground.service.PlaygroundService;
 import com.playgrounds.api.playground.web.PlaygroundController;
-import com.playgrounds.api.playground.web.PlaygroundNotFoundException;
-import com.playgrounds.api.user.repository.UserRepository;
 import com.playgrounds.api.user.model.Favorite;
 import com.playgrounds.api.user.model.User;
 import com.playgrounds.api.user.service.UserService;
@@ -39,7 +36,7 @@ public class UserController {
     @RequestMapping(method = RequestMethod.POST, consumes="application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public HttpHeaders saveUser(@RequestBody User user){
-        User newUser = userService.addUser(user);
+        User newUser = userService.addUserIfNotExist(user);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(linkTo(UserController.class).slash(newUser.getId()).toUri());
@@ -62,8 +59,7 @@ public class UserController {
     @RequestMapping(value="/{id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Resource<User> getUser(@PathVariable("id") String id){
-        User user = userService.userExist(id);
-        if(user == null) throw new UserNotFoundException(id);
+        User user = userService.getUser(id);
         Resource<User> resource = new Resource<User>(user);
         resource.add(linkTo(UserController.class).slash(user.getId()).withSelfRel());
         return resource;
@@ -82,7 +78,7 @@ public class UserController {
     @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<Resource<GeneralRate>> getUserFavorites(@PathVariable("user_id") String user_id){
-        User user = userService.userExist(user_id);
+        User user = userService.getUser(user_id);
         List<GeneralRate> playgrounds_list = new ArrayList<GeneralRate>();
         for(Favorite favorite : user.getFavorites()){
             GeneralRate generalRate = playgroundService.getGeneralRate(favorite.getPlayground());

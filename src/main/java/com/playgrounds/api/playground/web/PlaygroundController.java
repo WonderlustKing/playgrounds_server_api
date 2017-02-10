@@ -1,12 +1,11 @@
 package com.playgrounds.api.playground.web;
 
+import com.playgrounds.api.playground.model.*;
+import com.playgrounds.api.playground.service.GoogleRestClient;
 import com.playgrounds.api.playground.service.PlaygroundService;
 import com.playgrounds.api.user.service.UserService;
 import com.playgrounds.api.user.web.UserController;
-import com.playgrounds.api.playground.model.GeneralRate;
-import com.playgrounds.api.playground.model.Playground;
-import com.playgrounds.api.playground.model.Rate;
-import com.playgrounds.api.playground.model.Report;
+import javafx.application.Application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
@@ -29,11 +28,13 @@ public class PlaygroundController {
 
     private PlaygroundService playgroundService;
     private UserService userService;
+    private GoogleRestClient googleRestClient;
 
     @Autowired
-    public PlaygroundController(PlaygroundService playgroundService, UserService userService){
+    public PlaygroundController(PlaygroundService playgroundService, UserService userService, GoogleRestClient googleRestClient){
         this.playgroundService = playgroundService;
         this.userService = userService;
+        this.googleRestClient = googleRestClient;
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json")
@@ -45,6 +46,19 @@ public class PlaygroundController {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(linkTo(PlaygroundController.class).slash(newPlayground.getId()).toUri());
         return headers;
+    }
+
+    @RequestMapping(value = "/coordinates", method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<Resource<PlaygroundToMap>> allPlaygrounds_to_coordinates(){
+        List<PlaygroundToMap> playgroundToMapList = playgroundService.getAllPlaygroundsToMap();
+        List<Resource<PlaygroundToMap>> playgroundToMapResourceList = new ArrayList<Resource<PlaygroundToMap>>();
+        for(PlaygroundToMap playgroundToMap : playgroundToMapList){
+            Resource<PlaygroundToMap> resource = new Resource<>(playgroundToMap);
+            resource.add(linkTo(PlaygroundController.class).slash(playgroundToMap.getId()).withSelfRel());
+            playgroundToMapResourceList.add(resource);
+        }
+        return playgroundToMapResourceList;
     }
 
     @RequestMapping(value = "/{playground_id}", method = RequestMethod.GET, produces = "application/json")
@@ -83,12 +97,12 @@ public class PlaygroundController {
     public List<Resource<GeneralRate>> getAllPlaygroundsByCity(@PathVariable("city_name") String city){
         List<GeneralRate> playgrounds = playgroundService.getPlaygroundsByCity(city);
         List<Resource<GeneralRate>> allPlaygrounds = new ArrayList<Resource<GeneralRate>>();
-        for(GeneralRate rate_playground: playgrounds){
-            Resource<GeneralRate> resource = new Resource<GeneralRate>(rate_playground);
-            //Playground playground = playgroundRepository.findByCityIgnoreCaseAndNameIgnoreCase(city,rate_playground.getName());
-            resource.add(linkTo(PlaygroundController.class).slash(rate_playground.getId()).withSelfRel());
-            allPlaygrounds.add(resource);
-        }
+            for (GeneralRate rate_playground : playgrounds) {
+                Resource<GeneralRate> resource = new Resource<GeneralRate>(rate_playground);
+                //Playground playground = playgroundRepository.findByCityIgnoreCaseAndNameIgnoreCase(city,rate_playground.getName());
+                resource.add(linkTo(PlaygroundController.class).slash(rate_playground.getId()).withSelfRel());
+                allPlaygrounds.add(resource);
+            }
         return allPlaygrounds;
     }
 

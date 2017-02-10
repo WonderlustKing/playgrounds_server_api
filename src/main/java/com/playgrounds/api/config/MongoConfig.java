@@ -1,4 +1,4 @@
-package com.playgrounds.api.Config;
+package com.playgrounds.api.config;
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * Created by christos on 15/5/2016.
  */
 @Configuration
-@EnableMongoRepositories("com.playgrounds.api.Repository")
+@EnableMongoRepositories(value = {"com.playgrounds.api.playground.repository", "com.playgrounds.api.user.repository"})
 public class MongoConfig extends AbstractMongoConfiguration{
 
     @Override

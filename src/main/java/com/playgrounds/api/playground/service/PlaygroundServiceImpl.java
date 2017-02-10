@@ -1,10 +1,7 @@
 package com.playgrounds.api.playground.service;
 
 import com.playgrounds.api.playground.PlaygroundInteractor;
-import com.playgrounds.api.playground.model.GeneralRate;
-import com.playgrounds.api.playground.model.Playground;
-import com.playgrounds.api.playground.model.Rate;
-import com.playgrounds.api.playground.model.Report;
+import com.playgrounds.api.playground.model.*;
 import com.playgrounds.api.playground.repository.PlaygroundRepository;
 import com.playgrounds.api.playground.service.PlaygroundService;
 import com.playgrounds.api.playground.web.PlaygroundNotFoundException;
@@ -59,6 +56,11 @@ public class PlaygroundServiceImpl implements PlaygroundService {
         Playground playground = repository.findById(playground_id);
         if(user_id != null) interactor.moveUserRateOnTop(playground,user_id);
         return playground;
+    }
+
+    @Override
+    public List<PlaygroundToMap> getAllPlaygroundsToMap() {
+        return repository.findAllPlaygroundsToMap();
     }
 
     @Override
