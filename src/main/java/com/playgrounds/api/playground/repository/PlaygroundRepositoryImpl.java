@@ -149,6 +149,31 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     }
 
     @Override
+    public List<GeneralRate> findByCityOrderByRateWithDistance(String city, Double latitude, Double longitude) {
+
+        NearQuery query = NearQuery.near(latitude, longitude).in(Metrics.KILOMETERS).spherical(true);
+        Aggregation agg = newAggregation(
+                geoNear(query, "distance"),
+                match(where("city").is(city)),
+                group("id")
+                        .addToSet("distance").as("distance")
+                        .first("name").as("name")
+                        .first("popularity").as("popularity")
+                        //.first("location.coordinates").as("coordinates")
+                        //.first("date_added").as("date_added")
+                        .first("general_rate").as("rate")
+                        .first("imageURL").as("image"),
+                sort(Sort.Direction.DESC, "popularity")
+
+        );
+
+        AggregationResults<GeneralRate> groupResults = mongo.aggregate(agg, Playground.class, GeneralRate.class);
+        List<GeneralRate> result = groupResults.getMappedResults();
+
+        return result;
+    }
+
+    @Override
     public List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance, String sort) {
         Distance distance=new Distance(maxDistance,Metrics.KILOMETERS);
         //Criteria where = where("location").nearSphere(new GeoJsonPoint(longitude, latitude)).maxDistance(maxDistance);

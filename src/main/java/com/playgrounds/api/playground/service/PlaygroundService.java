@@ -15,7 +15,7 @@ public interface PlaygroundService {
     Playground updateRate(String playground_id, Rate rate);
     Playground getPlayground(String playground_id, String user_id);
     List<PlaygroundToMap> getAllPlaygroundsToMap();
-    List<GeneralRate> getPlaygroundsByCity(String city);
+    List<GeneralRate> getPlaygroundsByCity(String city, Double latitude, Double longitude);
     Playground getPlaygroundByCityAndByName(String city, String name);
     List<GeneralRate> nearByPlaygrounds(double latitude, double longitude, int maxDistance, String sortBy);
     Playground reportPlayground(String playground_id, Report report);

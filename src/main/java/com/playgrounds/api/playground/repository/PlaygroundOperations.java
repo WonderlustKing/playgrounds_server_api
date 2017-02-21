@@ -21,6 +21,8 @@ public interface PlaygroundOperations {
     Playground updateRate(Playground playground, Rate rate);
     @Cacheable(value = "playgroundsCache")
     List<GeneralRate> findByCityOrderByRate(String city);
+    @Cacheable(value = "playgroundsCache")
+    List<GeneralRate> findByCityOrderByRateWithDistance(String city, Double latitude, Double longitude);
     @Cacheable("playgroundsCache")
     List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance, String sort);
     List<PlaygroundToMap> findAllPlaygroundsToMap();

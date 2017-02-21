@@ -94,8 +94,11 @@ public class PlaygroundController {
 
     @RequestMapping(value = "/city/{city_name}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Resource<GeneralRate>> getAllPlaygroundsByCity(@PathVariable("city_name") String city){
-        List<GeneralRate> playgrounds = playgroundService.getPlaygroundsByCity(city);
+    public List<Resource<GeneralRate>> getAllPlaygroundsByCity(@PathVariable("city_name") String city,
+                                                               @RequestParam(value = "x", required = false) Double latitude,
+                                                               @RequestParam(value = "y", required = false) Double longitude) {
+
+        List<GeneralRate> playgrounds = playgroundService.getPlaygroundsByCity(city, latitude, longitude);
         List<Resource<GeneralRate>> allPlaygrounds = new ArrayList<Resource<GeneralRate>>();
             for (GeneralRate rate_playground : playgrounds) {
                 Resource<GeneralRate> resource = new Resource<GeneralRate>(rate_playground);

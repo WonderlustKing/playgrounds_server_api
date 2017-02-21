@@ -64,8 +64,12 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public List<GeneralRate> getPlaygroundsByCity(String city) {
-        return repository.findByCityOrderByRate(city);
+    public List<GeneralRate> getPlaygroundsByCity(String city, Double latitude, Double longitude) {
+        if (latitude != null && longitude != null) {
+            return repository.findByCityOrderByRateWithDistance(city, latitude, longitude);
+        } else {
+            return repository.findByCityOrderByRate(city);
+        }
     }
 
     @Override
