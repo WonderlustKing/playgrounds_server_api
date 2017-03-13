@@ -1,8 +1,9 @@
 package com.playgrounds.api.config;
 
 import com.playgrounds.api.user.repository.UserRepository;
-import com.playgrounds.api.user.repository.UserLogginService;
+import com.playgrounds.api.user.repository.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -16,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
  */
 @Configuration
 @EnableWebSecurity
+@ComponentScan
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -27,7 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth
                 //.inMemoryAuthentication()
                 //.withUser("user").password("password").roles("USER");
-            .userDetailsService(new UserLogginService(userRepository));
+            .userDetailsService(new UserAuthService(userRepository));
     }
 
 

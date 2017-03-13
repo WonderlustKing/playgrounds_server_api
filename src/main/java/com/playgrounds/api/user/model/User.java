@@ -4,6 +4,7 @@ import com.playgrounds.api.user.model.Favorite;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,4 +65,5 @@ public class User {
     public void setFavorites(List<Favorite> favorites) {
         this.favorites = favorites;
     }
+
 }

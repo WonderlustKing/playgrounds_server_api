@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,11 +37,7 @@ public class UserController {
     @RequestMapping(method = RequestMethod.POST, consumes="application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public HttpHeaders saveUser(@RequestBody User user){
-        User newUser = userService.addUserIfNotExist(user);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(UserController.class).slash(newUser.getId()).toUri());
-        return headers;
+        return userService.addUserIfNotExist(user);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
@@ -58,42 +55,21 @@ public class UserController {
 
     @RequestMapping(value="/{id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Resource<User> getUser(@PathVariable("id") String id){
-        User user = userService.getUser(id);
-        Resource<User> resource = new Resource<User>(user);
-        resource.add(linkTo(UserController.class).slash(user.getId()).withSelfRel());
-        return resource;
+    public ResponseEntity<Resource<User>> getUser(@PathVariable("id") String userId){
+        return userService.getUser(userId);
     }
 
     @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders addFavorite(@RequestBody Favorite favorite, @PathVariable("user_id") String user_id){
-        Playground playground = playgroundService.getPlayground(favorite.getPlayground(),null);
-        userService.addFavorite(user_id,favorite);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(UserController.class).slash(user_id).slash("favorites").toUri());
-        return headers;
+    public HttpHeaders addFavorite(@RequestBody Favorite favorite, @PathVariable("user_id") String userId){
+        //Playground playground = playgroundService.getPlayground(favorite.getPlayground(),null);
+        return userService.addFavorite(userId, favorite);
     }
 
     @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Resource<GeneralRate>> getUserFavorites(@PathVariable("user_id") String user_id){
-        User user = userService.getUser(user_id);
-        List<GeneralRate> playgrounds_list = new ArrayList<GeneralRate>();
-        for(Favorite favorite : user.getFavorites()){
-            GeneralRate generalRate = playgroundService.getGeneralRate(favorite.getPlayground());
-            playgrounds_list.add(generalRate);
-        }
-        List<Resource<GeneralRate>> resources = new ArrayList<Resource<GeneralRate>>();
-        for(GeneralRate generalRate : playgrounds_list){
-            Resource<GeneralRate> resource = new Resource<GeneralRate>(generalRate);
-            resource.add(linkTo(PlaygroundController.class).slash(generalRate.getId()).withSelfRel());
-            resources.add(resource);
-        }
-
-        return resources;
+    public ResponseEntity<List<GeneralRate>> getUserFavorites(@PathVariable("user_id") String userId){
+        return userService.getUserFavorites(userId);
     }
-
-
 
 }

@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.4.0.RELEASE'
+		springBootVersion = '1.5.2.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -8,6 +8,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
 	}
+
 }
 
 apply plugin: 'java'
@@ -35,6 +36,7 @@ repositories {
 
 
 dependencies {
+	compile 'org.springframework.boot:spring-boot-starter-web'
 	compile('org.springframework.boot:spring-boot-starter-cache')
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 	compile('org.springframework.boot:spring-boot-starter-hateoas')
@@ -46,6 +48,10 @@ dependencies {
 	compile "commons-io:commons-io:+"
 	testCompile 'io.rest-assured:rest-assured:3.0.1'
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+configurations {
+
 }
 
 

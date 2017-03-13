@@ -4,16 +4,18 @@ import com.playgrounds.api.playground.model.*;
 import com.playgrounds.api.playground.service.GoogleRestClient;
 import com.playgrounds.api.playground.service.PlaygroundService;
 import com.playgrounds.api.user.service.UserService;
-import com.playgrounds.api.user.web.UserController;
-import javafx.application.Application;
+import com.playgrounds.api.user.validator.RateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.net.MalformedURLException;
 import java.util.*;
 
@@ -28,132 +30,100 @@ public class PlaygroundController {
 
     private PlaygroundService playgroundService;
     private UserService userService;
-    private GoogleRestClient googleRestClient;
 
     @Autowired
-    public PlaygroundController(PlaygroundService playgroundService, UserService userService, GoogleRestClient googleRestClient){
+    public PlaygroundController(PlaygroundService playgroundService, UserService userService) {
         this.playgroundService = playgroundService;
         this.userService = userService;
-        this.googleRestClient = googleRestClient;
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders savePlayground(@RequestBody Playground playground){
-        userService.userExist(playground.getAdded_by());
-        Playground newPlayground = playgroundService.create(playground);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(PlaygroundController.class).slash(newPlayground.getId()).toUri());
-        return headers;
+    public HttpHeaders addPlayground(@RequestBody @Valid Playground playground) {
+        return playgroundService.addPlayground(playground);
     }
 
     @RequestMapping(value = "/coordinates", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Resource<PlaygroundToMap>> allPlaygrounds_to_coordinates(){
-        List<PlaygroundToMap> playgroundToMapList = playgroundService.getAllPlaygroundsToMap();
-        List<Resource<PlaygroundToMap>> playgroundToMapResourceList = new ArrayList<Resource<PlaygroundToMap>>();
-        for(PlaygroundToMap playgroundToMap : playgroundToMapList){
-            Resource<PlaygroundToMap> resource = new Resource<>(playgroundToMap);
-            resource.add(linkTo(PlaygroundController.class).slash(playgroundToMap.getId()).withSelfRel());
-            playgroundToMapResourceList.add(resource);
-        }
-        return playgroundToMapResourceList;
+    public ResponseEntity<List<PlaygroundToMap>> getPlaygroundsCoordinates() {
+        return playgroundService.getAllPlaygroundsToMap();
     }
 
     @RequestMapping(value = "/{playground_id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Resource<Playground> playground_details(@PathVariable("playground_id") String id,@RequestParam(value = "user", required = false) String user){
-        Playground playground = playgroundService.getPlayground(id,user);
-        Resource<Playground> resource = new Resource<Playground>(playground);
-        resource.add(linkTo(UserController.class).slash(playground.getAdded_by()).withRel("added_by"));
-        return resource;
+    public ResponseEntity<Resource<Playground>> getPlaygroundDetails(@PathVariable("playground_id") String id, @RequestParam(value = "user", required = false) String user) {
+        return playgroundService.getPlayground(id, user);
     }
+
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders addRate(@RequestBody Rate rate, @PathVariable("playground_id") String id){
-        userService.userExist(rate.getUser());
-        playgroundService.addRate(id,rate);
-
-        HttpHeaders headers = new HttpHeaders();
+    public HttpHeaders addRate(@RequestBody Rate rate, @PathVariable("playground_id") String id) {
+        //userService.userExist(rate.getUser());
+        return playgroundService.addRate(id, rate);
         //headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(user.getUsername().toLowerCase()).toUri());
-        return headers;
     }
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.PUT, consumes = "application/json")
-    public HttpHeaders updateRate(@RequestBody Rate rate, @PathVariable("playground_id") String id){
-        userService.userExist(rate.getUser());
-        playgroundService.updateRate(id,rate);
-
-        HttpHeaders headers = new HttpHeaders();
+    @ResponseStatus(HttpStatus.OK)
+    public void updateRate(@RequestBody Rate rate, @PathVariable("playground_id") String id) {
+        //userService.userExist(rate.getUser());
+        playgroundService.updateRate(id, rate);
         //headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(user.getUsername().toLowerCase()).toUri());
-        return headers;
     }
 
 
-    @RequestMapping(value = "/city/{city_name}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/location", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Resource<GeneralRate>> getAllPlaygroundsByCity(@PathVariable("city_name") String city,
-                                                               @RequestParam(value = "x", required = false) Double latitude,
-                                                               @RequestParam(value = "y", required = false) Double longitude) {
-
-        List<GeneralRate> playgrounds = playgroundService.getPlaygroundsByCity(city, latitude, longitude);
-        List<Resource<GeneralRate>> allPlaygrounds = new ArrayList<Resource<GeneralRate>>();
-            for (GeneralRate rate_playground : playgrounds) {
-                Resource<GeneralRate> resource = new Resource<GeneralRate>(rate_playground);
-                //Playground playground = playgroundRepository.findByCityIgnoreCaseAndNameIgnoreCase(city,rate_playground.getName());
-                resource.add(linkTo(PlaygroundController.class).slash(rate_playground.getId()).withSelfRel());
-                allPlaygrounds.add(resource);
-            }
-        return allPlaygrounds;
+    public ResponseEntity<List<GeneralRate>> getAllPlaygroundsByLocation(@RequestParam(value = "x", required = false) Double latitude,
+                                                                         @RequestParam(value = "y", required = false) Double longitude) throws Exception {
+        return playgroundService.getPlaygroundsByCity(latitude, longitude);
     }
 
-    @RequestMapping(value = "/search/{city_name}/{playground_name}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/search", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Resource<Playground> getPlayground(@PathVariable("city_name") String city, @PathVariable("playground_name") String name){
-        Playground playground = playgroundService.getPlaygroundByCityAndByName(city,name);
-        Resource<Playground> resource = new Resource<Playground>(playground);
-        resource.add(linkTo(PlaygroundController.class).slash(playground.getCity()).slash(playground.getName()).withSelfRel());
-        return resource;
+    public ResponseEntity<Resource<Playground>> searchPlayground(@RequestParam(value = "x") Double latitude,
+                                                                 @RequestParam(value = "y") Double longitude,
+                                                                 @RequestParam(value = "playground") String playgoundName) {
+        return playgroundService.getPlaygroundByLocationAndByName(latitude, longitude, playgoundName);
     }
 
-    @RequestMapping(value="/near_me", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/near_me", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Resource<GeneralRate>> nearMe(@RequestParam(value = "x") double x, @RequestParam(value = "y") double y, @RequestParam(value = "maxDistance") int max, @RequestParam(value="sort",defaultValue = "distance") String sort){
-        List<GeneralRate> playgrounds = playgroundService.nearByPlaygrounds(x,y,max,sort);
-        List<Resource<GeneralRate>> resource_playgrounds = new ArrayList<Resource<GeneralRate>>();
-        for(GeneralRate playground : playgrounds){
-            Resource<GeneralRate> resource = new Resource<GeneralRate>(playground);
-            resource.add(linkTo(PlaygroundController.class).slash(playground.getId()).withSelfRel());
-            resource_playgrounds.add(resource);
-        }
-        Collections.reverse(resource_playgrounds);
-        return  resource_playgrounds;
+    public ResponseEntity<List<GeneralRate>> nearMe(@RequestParam(value = "x") double latitude,
+                                                    @RequestParam(value = "y") double longitude,
+                                                    @RequestParam(value = "maxDistance") int max,
+                                                    @RequestParam(value = "sort", defaultValue = "distance") String sort) {
+
+        return playgroundService.nearByPlaygrounds(latitude, longitude, max, sort);
     }
 
     @RequestMapping(value = "/report/{id}", method = RequestMethod.POST, produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders reportPlayground(@RequestBody Report report, @PathVariable("id") String playground_id){
-        userService.userExist(report.getUser_id());
-        Playground playground = playgroundService.reportPlayground(playground_id,report);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(linkTo(PlaygroundController.class).slash("report").slash(playground.getId()).slash(report.getUser_id()).toUri());
-        return headers;
+    public HttpHeaders reportPlayground(@RequestBody Report report, @PathVariable("id") String playground_id) {
+        //userService.userExist(report.getUser_id());
+        return playgroundService.reportPlayground(playground_id, report);
     }
 
 
     @RequestMapping(value = "/upload/{playground_id}", method = RequestMethod.POST, produces = "text/plain")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadImage(@PathVariable("playground_id") String playground_id,@RequestParam(value = "user") String user_id, @RequestParam(value="file") MultipartFile image) throws MalformedURLException {
+    public String uploadImage(@PathVariable("playground_id") String playground_id,
+                              @RequestParam(value = "user") String user_id,
+                              @RequestParam(value = "file") MultipartFile image) throws MalformedURLException {
         userService.userExist(user_id);
-        playgroundService.addImageToPlayground(playground_id,user_id,image);
+        playgroundService.addImageToPlayground(playground_id, user_id, image);
         return "Image upload successfully";
     }
 
     @RequestMapping(value = "/images/{image_id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public byte[] getPlaygroundImage(@PathVariable("image_id") String image_id){
+    public byte[] getPlaygroundImage(@PathVariable("image_id") String image_id) {
         return playgroundService.getImage(image_id);
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public void notFoundRoute() {
+
     }
 }

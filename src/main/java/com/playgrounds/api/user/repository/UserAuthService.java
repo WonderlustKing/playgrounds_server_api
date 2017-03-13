@@ -14,10 +14,10 @@ import java.util.List;
 /**
  * Created by christos on 4/8/2016.
  */
-public class UserLogginService implements UserDetailsService {
+public class UserAuthService implements UserDetailsService {
     private UserRepository userRepository;
 
-    public UserLogginService(UserRepository userRepository){
+    public UserAuthService(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 

@@ -1,11 +1,13 @@
 package com.playgrounds.api.playground.model;
 
+import org.springframework.hateoas.ResourceSupport;
+
 import java.net.URL;
 
 /**
  * Created by christos on 28/5/2016.
  */
-public class GeneralRate {
+public class GeneralRate extends ResourceSupport{
 
     private String id;
     private String name;
@@ -25,7 +27,7 @@ public class GeneralRate {
     }
 
 
-    public String getId() {
+    public String getPlaygroundId() {
         return id;
     }
 

@@ -1,4 +1,4 @@
-package com.playgrounds.api.playground.model;
+package com.playgrounds.api.playground.model.Response;
 
 /**
  * Created by chris on 17/12/2016.

@@ -24,13 +24,6 @@ public class PlaygroundInteractor {
     public PlaygroundInteractor(){
     }
 
-    public void createPlayground(Playground pl){
-        if(pl.getName().isEmpty()) throw new RuntimeException("Name can't be empty");
-        if(pl.getCity().isEmpty()) throw new RuntimeException("City name can't be empty");
-        if(pl.getAdded_by().isEmpty()) throw new RuntimeException("Added_by user can't be empty");
-        if(!testImage(pl.getImageURL())) throw new RuntimeException("Not valid image file");
-        //service.create(pl);
-    }
 
     private boolean testImage(URL image){
         try{
@@ -42,16 +35,16 @@ public class PlaygroundInteractor {
         }
     }
 
-    public void addRate(Playground playground, Rate rate){
+    public void checkIfRateExist(Playground playground, Rate rate) {
         String user_id = rate.getUser();
-        if(playground.getRate().size() > 0) {
-              ListIterator<Rate> list = playground.getRate().listIterator();
+        if (playground.getRate().size() > 0) {
+            ListIterator<Rate> list = playground.getRate().listIterator();
             while (list.hasNext()) {
-                   Rate rateSearch = list.next();
+                Rate rateSearch = list.next();
                 if (rateSearch.getUser().equals(rate.getUser())) throw new UserRateExistException(user_id);
-                }
+            }
         }
-        playground.getRate().add(rate);
+        //playground.getRate().add(rate);
     }
 
     public void moveUserRateOnTop(Playground playground, String user_id){
@@ -71,10 +64,10 @@ public class PlaygroundInteractor {
     }
 
     public URL addImage(Playground playground, String image_id) throws MalformedURLException {
-        String imagePath = hostURL+image_id;
+        String imagePath = hostURL + image_id;
         URL imageURL = new URL(imagePath);
         playground.getImages().add(imageURL);
-        if(playground.getImageURL() == null) playground.setImageURL(imageURL);
+        if (playground.getImageURL() == null) playground.setImageURL(imageURL);
         return imageURL;
     }
 

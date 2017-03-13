@@ -1,10 +1,12 @@
 package com.playgrounds.api.playground.model;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -22,22 +24,31 @@ public class Playground {
     private String id;
 
     @NotNull
+    @NotEmpty
     private String name;
 
     @NotNull
+    @NotEmpty
     private String city;
 
     @NotNull
+    @NotEmpty
     private String address;
 
+    @NotNull
+    @NotEmpty
     @Indexed
     private Location location;
 
     private double popularity =0;
 
+    @NotNull
+    @NotEmpty
+    @Past
     private Date date_added;
 
     @NotNull
+    @NotEmpty
     private String added_by;
 
     private URL imageURL = new URL("http://83.212.122.113:8080/playgrounds/images/58148adecce2c09ffda9d1c8");

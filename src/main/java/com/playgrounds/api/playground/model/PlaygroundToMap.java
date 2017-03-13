@@ -1,9 +1,13 @@
 package com.playgrounds.api.playground.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.hateoas.ResourceSupport;
+
 /**
  * Created by chris on 9/1/2017.
  */
-public class PlaygroundToMap {
+public class PlaygroundToMap extends ResourceSupport {
+
 
     private String id;
     private String name;
@@ -15,11 +19,12 @@ public class PlaygroundToMap {
         this.coordinates = coordinates;
     }
 
-    public String getId() {
+    @JsonIgnore
+    public String getPlaygroundId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setPlaygroundId(String id) {
         this.id = id;
     }
 
