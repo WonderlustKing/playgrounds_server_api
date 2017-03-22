@@ -5,6 +5,7 @@ import com.playgrounds.api.playground.model.*;
 import com.playgrounds.api.playground.repository.PlaygroundRepository;
 import com.playgrounds.api.playground.web.PlaygroundController;
 import com.playgrounds.api.playground.web.PlaygroundNotFoundException;
+import com.playgrounds.api.user.service.UserService;
 import com.playgrounds.api.user.web.UserController;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -34,12 +34,14 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     private PlaygroundRepository repository;
     private PlaygroundInteractor interactor;
     private LocationConverter locationConverter;
+    private UserService userService;
 
     @Autowired
-    public PlaygroundServiceImpl(PlaygroundRepository repository, LocationConverter locationConverter) {
+    public PlaygroundServiceImpl(PlaygroundRepository repository, LocationConverter locationConverter, UserService userService) {
         this.repository = repository;
         this.interactor = new PlaygroundInteractor();
         this.locationConverter = locationConverter;
+        this.userService = userService;
     }
 
     @Override
@@ -51,6 +53,7 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     @Override
     public HttpHeaders addRate(String playground_id, Rate rate) {
         Playground playground = getPlaygroundById(playground_id);
+        if (playground == null) throw new PlaygroundNotFoundException(playground_id);
         interactor.checkIfRateExist(playground, rate);
         playground = repository.addRate(playground, rate);
         return addPlaygroundHeaders(playground);
@@ -75,8 +78,7 @@ public class PlaygroundServiceImpl implements PlaygroundService {
 
         Resource<Playground> resource = new Resource<>(playground);
         resource.add(linkTo(UserController.class).slash(playground.getAdded_by()).withRel("added_by"));
-        ResponseEntity<Resource<Playground>> responseEntity = new ResponseEntity<>(resource, HttpStatus.OK);
-        return responseEntity;
+        return new ResponseEntity<>(resource, HttpStatus.OK);
     }
 
     @Override
@@ -96,14 +98,6 @@ public class PlaygroundServiceImpl implements PlaygroundService {
             generalRate.add(linkTo(PlaygroundController.class).slash(generalRate.getPlaygroundId()).withSelfRel());
         }
         return new ResponseEntity<>(generalRates, HttpStatus.OK);
-
-        /*
-        if (latitude != null && longitude != null) {
-            return repository.findByCityOrderByRateWithDistance(city, latitude, longitude);
-        } else {
-            return repository.findByCityOrderByRate(city);
-        }
-        */
     }
 
     @Override
@@ -115,8 +109,7 @@ public class PlaygroundServiceImpl implements PlaygroundService {
         }
         Resource<Playground> playgroundResource = new Resource<>(playground);
         playgroundResource.add(linkTo(PlaygroundController.class).slash(playgroundResource.getId()).withSelfRel());
-        ResponseEntity<Resource<Playground>> responseEntity = new ResponseEntity<>(playgroundResource, HttpStatus.OK);
-        return responseEntity;
+        return new ResponseEntity<>(playgroundResource, HttpStatus.OK);
     }
 
     @Override
@@ -133,7 +126,6 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     public HttpHeaders reportPlayground(String playground_id, Report report) {
         Playground playground = repository.findById(playground_id);
         if (playground == null) throw new PlaygroundNotFoundException(playground_id);
-        interactor.addReport(playground, report);
         playground = repository.addReport(report, playground);
 
         HttpHeaders headers = new HttpHeaders();
@@ -142,24 +134,37 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public boolean addImageToPlayground(String playground_id, String user_id, MultipartFile image) throws MalformedURLException {
+    public HttpHeaders addImageToPlayground(String playground_id, Image image) throws MalformedURLException {
         if (image == null) throw new RuntimeException("Cant upload null image");
         Playground playground = repository.findById(playground_id);
         if (playground == null) throw new PlaygroundNotFoundException(playground_id);
+
+        String uploadImageId = uploadImage(playground, image.getUserId(), image.getMultipartFile());
+        URL uploadImageURL = updatePlaygroundImageField(playground, uploadImageId);
+        if (playground.getImages().size() == 1) {
+            repository.addImageProfile(playground, uploadImageURL);
+        }
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setLocation(linkTo(PlaygroundController.class).slash("images").slash(uploadImageId).toUri());
+        return httpHeaders;
+    }
+
+    private String uploadImage(Playground playground, String user_id, MultipartFile image) {
         String fileName = interactor.uploadedImageName(playground);
-        String uploaded_image_id = repository.uploadImage(playground_id, user_id, fileName, image);
-        URL imageUrl = interactor.addImage(playground, uploaded_image_id);
+        return repository.uploadImage(playground.getId(), user_id, fileName, image);
+    }
+
+    private URL updatePlaygroundImageField(Playground playground, String imageId) throws MalformedURLException{
+        URL imageUrl = interactor.addImage(playground, imageId);
         repository.updateImageField(playground, imageUrl);
-        if (playground.getImages().size() == 1) repository.addImageProfile(playground, imageUrl);
-        return true;
+        return imageUrl;
     }
 
     @Override
     public GeneralRate getGeneralRate(String playground_id) {
         Playground playground = repository.findById(playground_id);
         if (playground == null) throw new PlaygroundNotFoundException(playground_id);
-        GeneralRate generalRate = repository.getPlaygroundGeneral(playground_id);
-        return generalRate;
+        return repository.getPlaygroundGeneral(playground_id);
     }
 
     @Override
@@ -167,8 +172,7 @@ public class PlaygroundServiceImpl implements PlaygroundService {
         InputStream inputStream = repository.findImageById(image_id);
         if (inputStream == null) throw new RuntimeException("Can't found image");
         try {
-            byte[] bytes = IOUtils.toByteArray(inputStream);
-            return bytes;
+            return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

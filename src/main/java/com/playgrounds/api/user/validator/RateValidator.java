@@ -4,6 +4,7 @@ import com.playgrounds.api.playground.model.Rate;
 import com.playgrounds.api.user.service.UserService;
 import com.playgrounds.api.user.web.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -13,6 +14,7 @@ import org.springframework.validation.Validator;
  */
 
 @Component
+@ComponentScan
 public class RateValidator implements Validator {
 
     @Autowired
@@ -20,7 +22,7 @@ public class RateValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return Rate.class.equals(clazz);
+        return Rate.class.isAssignableFrom(clazz);
     }
 
     @Override

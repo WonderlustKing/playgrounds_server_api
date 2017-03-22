@@ -1,14 +1,15 @@
 package com.playgrounds.api.playground.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -19,6 +20,8 @@ import java.util.List;
  */
 @Document
 public class Playground {
+
+    private static final DecimalFormat df = new DecimalFormat(".##");
 
     @Id
     private String id;
@@ -35,16 +38,11 @@ public class Playground {
     @NotEmpty
     private String address;
 
-    @NotNull
-    @NotEmpty
     @Indexed
     private Location location;
 
     private double popularity =0;
 
-    @NotNull
-    @NotEmpty
-    @Past
     private Date date_added;
 
     @NotNull
@@ -53,7 +51,7 @@ public class Playground {
 
     private URL imageURL = new URL("http://83.212.122.113:8080/playgrounds/images/58148adecce2c09ffda9d1c8");
 
-    private List<URL> images = new ArrayList<URL>();
+    private List<URL> images = new ArrayList<>();
 
     private int rates_num =0;
 
@@ -68,10 +66,11 @@ public class Playground {
     private double general_kids_supervision =0;
 
     @Indexed
-    private LinkedList<Rate> rate = new LinkedList<Rate>();
+    private LinkedList<Rate> rate = new LinkedList<>();
 
-    private List<Report> reports = new ArrayList<Report>();
+    private List<Report> reports = new ArrayList<>();
 
+    @JsonIgnore
     private String distance;
 
     public Playground() throws MalformedURLException {
@@ -135,7 +134,7 @@ public class Playground {
     }
 
     public double getPopularity() {
-        return popularity;
+        return Double.valueOf(df.format(popularity));
     }
 
     public void setPopularity(double popularity) {
@@ -175,7 +174,7 @@ public class Playground {
     }
 
     public double getGeneral_rate() {
-        return general_rate;
+        return Double.valueOf(df.format(general_rate));
     }
 
     public void setGeneral_rate(double general_rate) {
@@ -183,7 +182,7 @@ public class Playground {
     }
 
     public double getGeneral_environment() {
-        return general_environment;
+        return Double.valueOf(df.format(general_environment));
     }
 
     public void setGeneral_environment(double general_environment) {
@@ -191,7 +190,7 @@ public class Playground {
     }
 
     public double getGeneral_equipment() {
-        return general_equipment;
+        return Double.valueOf(df.format(general_equipment));
     }
 
     public void setGeneral_equipment(double general_equipment) {
@@ -199,7 +198,7 @@ public class Playground {
     }
 
     public double getGeneral_prices() {
-        return general_prices;
+        return Double.valueOf(df.format(general_prices));
     }
 
     public void setGeneral_prices(double general_prices) {
@@ -207,7 +206,7 @@ public class Playground {
     }
 
     public double getGeneral_kids_supervision() {
-        return general_kids_supervision;
+        return Double.valueOf(df.format(general_kids_supervision));
     }
 
     public void setGeneral_kids_supervision(double general_kids_supervision) {

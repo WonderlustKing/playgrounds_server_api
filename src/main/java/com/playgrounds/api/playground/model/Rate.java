@@ -1,5 +1,7 @@
 package com.playgrounds.api.playground.model;
 
+import com.playgrounds.api.user.validator.UserExist;
+
 import java.util.Date;
 
 /**
@@ -9,6 +11,7 @@ import java.util.Date;
 
 public class Rate {
 
+    @UserExist(message = "User not exist")
     private String user;
 
     private Date date;

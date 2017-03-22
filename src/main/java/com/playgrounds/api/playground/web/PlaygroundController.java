@@ -1,17 +1,14 @@
 package com.playgrounds.api.playground.web;
 
 import com.playgrounds.api.playground.model.*;
-import com.playgrounds.api.playground.service.GoogleRestClient;
 import com.playgrounds.api.playground.service.PlaygroundService;
 import com.playgrounds.api.user.service.UserService;
-import com.playgrounds.api.user.validator.RateValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,18 +55,14 @@ public class PlaygroundController {
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders addRate(@RequestBody Rate rate, @PathVariable("playground_id") String id) {
-        //userService.userExist(rate.getUser());
+    public HttpHeaders addRate(@RequestBody @Valid Rate rate, @PathVariable("playground_id") String id) {
         return playgroundService.addRate(id, rate);
-        //headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(user.getUsername().toLowerCase()).toUri());
     }
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.PUT, consumes = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public void updateRate(@RequestBody Rate rate, @PathVariable("playground_id") String id) {
-        //userService.userExist(rate.getUser());
+    public void updateRate(@RequestBody @Valid Rate rate, @PathVariable("playground_id") String id) {
         playgroundService.updateRate(id, rate);
-        //headers.setLocation(linkTo(PlaygroundController.class).slash("rate").slash(playground.getId()).slash(user.getUsername().toLowerCase()).toUri());
     }
 
 
@@ -84,8 +77,8 @@ public class PlaygroundController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource<Playground>> searchPlayground(@RequestParam(value = "x") Double latitude,
                                                                  @RequestParam(value = "y") Double longitude,
-                                                                 @RequestParam(value = "playground") String playgoundName) {
-        return playgroundService.getPlaygroundByLocationAndByName(latitude, longitude, playgoundName);
+                                                                 @RequestParam(value = "playground") String playgroundName) {
+        return playgroundService.getPlaygroundByLocationAndByName(latitude, longitude, playgroundName);
     }
 
     @RequestMapping(value = "/near_me", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -100,20 +93,17 @@ public class PlaygroundController {
 
     @RequestMapping(value = "/report/{id}", method = RequestMethod.POST, produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders reportPlayground(@RequestBody Report report, @PathVariable("id") String playground_id) {
-        //userService.userExist(report.getUser_id());
+    public HttpHeaders reportPlayground(@RequestBody @Valid Report report, @PathVariable("id") String playground_id) {
         return playgroundService.reportPlayground(playground_id, report);
     }
 
 
     @RequestMapping(value = "/upload/{playground_id}", method = RequestMethod.POST, produces = "text/plain")
     @ResponseStatus(HttpStatus.CREATED)
-    public String uploadImage(@PathVariable("playground_id") String playground_id,
-                              @RequestParam(value = "user") String user_id,
-                              @RequestParam(value = "file") MultipartFile image) throws MalformedURLException {
-        userService.userExist(user_id);
-        playgroundService.addImageToPlayground(playground_id, user_id, image);
-        return "Image upload successfully";
+    public HttpHeaders uploadImage(@PathVariable("playground_id") String playground_id,
+                                    @RequestBody Image image) throws MalformedURLException {
+        //userService.userExist(userId);
+        return playgroundService.addImageToPlayground(playground_id, image);
     }
 
     @RequestMapping(value = "/images/{image_id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)

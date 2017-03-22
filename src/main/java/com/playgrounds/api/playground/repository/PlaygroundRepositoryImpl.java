@@ -43,8 +43,8 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         Criteria where = where("id").is(playground.getId());
         Query query = Query.query(where);
         Update update = new Update();
-        update.push("rate",rate);
-        update.set("rates_num",playground.getRate().size());
+        update.push("rate", rate);
+        update.set("rates_num", playground.getRate().size() + 1);
         mongo.updateFirst(query, update, Playground.class);
 
 
@@ -56,7 +56,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         .first("popularity").as("popularity")
                         .first("date_added").as("date_added")
                         .sum("rate.general_rate").as("rate")
-                        .count().as("num_rates")
+                        .count().as("rates_num")
                         .sum("$rate.environment").as("environment")
                         .sum("$rate.equipment").as("equipment")
                         .sum("$rate.prices").as("prices")
@@ -64,28 +64,28 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                 score()
         );
 
-                AggregationResults<Playground> groupResults = mongo.aggregate(agg,Playground.class, Playground.class);
-                Playground playground1 = groupResults.getUniqueMappedResult();
+        AggregationResults<Playground> groupResults = mongo.aggregate(agg, Playground.class, Playground.class);
+        Playground playground1 = groupResults.getUniqueMappedResult();
 
         Update update1 = new Update();
-        update1.set("popularity",playground1.getPopularity());
+        update1.set("popularity", playground1.getPopularity());
         update1.set("general_rate", playground1.getGeneral_rate());
-        update1.set("general_environment",playground1.getGeneral_environment());
+        update1.set("general_environment", playground1.getGeneral_environment());
         update1.set("general_equipment", playground1.getGeneral_equipment());
         update1.set("general_prices", playground1.getGeneral_prices());
         update1.set("general_kids_supervision", playground1.getGeneral_kids_supervision());
-        mongo.updateFirst(query,update1,Playground.class);
+        mongo.updateFirst(query, update1, Playground.class);
 
         return playground;
     }
 
     @Override
     public Playground updateRate(Playground playground, Rate rate) {
-        Criteria where = where("id").is(playground.getId()).and("rate.user_id").is(rate.getUser());
+        Criteria where = where("id").is(playground.getId()).and("rate.user").is(rate.getUser());
         Query query = Query.query(where);
         Update update = new Update();
-        update.set("rate.$.general_rate",rate.getGeneral_rate());
-        update.set("rate.$.comment",rate.getComment());
+        update.set("rate.$.general_rate", rate.getGeneral_rate());
+        update.set("rate.$.comment", rate.getComment());
         update.set("rate.$.environment", rate.getEnvironment());
         update.set("rate.$.equipment", rate.getEquipment());
         update.set("rate.$.prices", rate.getPrices());
@@ -100,7 +100,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         .first("popularity").as("popularity")
                         .first("date_added").as("date_added")
                         .sum("rate.general_rate").as("rate")
-                        .count().as("num_rates")
+                        .count().as("rates_num")
                         .sum("$rate.environment").as("environment")
                         .sum("$rate.equipment").as("equipment")
                         .sum("$rate.prices").as("prices")
@@ -108,17 +108,17 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                 score()
         );
 
-        AggregationResults<Playground> groupResults = mongo.aggregate(agg,Playground.class, Playground.class);
+        AggregationResults<Playground> groupResults = mongo.aggregate(agg, Playground.class, Playground.class);
         Playground playground1 = groupResults.getUniqueMappedResult();
 
         Update update1 = new Update();
-        update1.set("popularity",playground1.getPopularity());
+        update1.set("popularity", playground1.getPopularity());
         update1.set("general_rate", playground1.getGeneral_rate());
-        update1.set("general_environment",playground1.getGeneral_environment());
+        update1.set("general_environment", playground1.getGeneral_environment());
         update1.set("general_equipment", playground1.getGeneral_equipment());
         update1.set("general_prices", playground1.getGeneral_prices());
         update1.set("general_kids_supervision", playground1.getGeneral_kids_supervision());
-        mongo.updateFirst(query,update1,Playground.class);
+        mongo.updateFirst(query, update1, Playground.class);
 
         return playground;
 
@@ -400,31 +400,31 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         ).append(
                 "general_environment",new BasicDBObject(
                         "$divide",new Object[]{
-                        "$environment","$num_rates"
+                        "$environment","$rates_num"
                 }
                 )
         ).append(
                 "general_equipment",new BasicDBObject(
                         "$divide",new Object[]{
-                        "$equipment","$num_rates"
+                        "$equipment","$rates_num"
                 }
                 )
         ).append(
                 "general_prices",new BasicDBObject(
                         "$divide",new Object[]{
-                        "$prices","$num_rates"
+                        "$prices","$rates_num"
                 }
                 )
         ).append(
                 "general_kids_supervision",new BasicDBObject(
                         "$divide",new Object[]{
-                        "$kids_supervision","$num_rates"
+                        "$kids_supervision","$rates_num"
                 }
                 )
         ).append(
                 "general_rate",new BasicDBObject(
                         "$divide",new Object[]{
-                        "$rate","$num_rates"
+                        "$rate","$rates_num"
                 }
                 )
         ).append("popularity", new BasicDBObject(
@@ -435,7 +435,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         "$ln", new Object[]{
                         new BasicDBObject(
                                 "$divide",new Object[]{
-                                "$num_rates",0.95
+                                "$rates_num",0.95
                         }
                         )
                 }

@@ -1,11 +1,15 @@
 package com.playgrounds.api.playground.model;
 
+import com.playgrounds.api.user.validator.UserExist;
+
 /**
  * Created by christos on 5/8/2016.
  */
 public class Report {
 
+    @UserExist
     private String user_id;
+
     private String reason;
 
     public String getUser_id() {

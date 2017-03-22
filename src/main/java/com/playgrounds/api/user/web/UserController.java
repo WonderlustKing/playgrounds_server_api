@@ -13,6 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,9 +46,9 @@ public class UserController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<Resource<User>> getAllUsers(){
         List<User> users = userService.getAllUsers();
-        List<Resource<User>> allUsers = new ArrayList<Resource<User>>();
+        List<Resource<User>> allUsers = new ArrayList<>();
         for(User user: users){
-            Resource<User> resource = new Resource<User>(user);
+            Resource<User> resource = new Resource<>(user);
             resource.add(linkTo(UserController.class).slash(user.getId()).withSelfRel());
             allUsers.add(resource);
         }
@@ -61,7 +63,7 @@ public class UserController {
 
     @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders addFavorite(@RequestBody Favorite favorite, @PathVariable("user_id") String userId){
+    public HttpHeaders addFavorite(@RequestBody @Valid Favorite favorite, @PathVariable("user_id") String userId){
         //Playground playground = playgroundService.getPlayground(favorite.getPlayground(),null);
         return userService.addFavorite(userId, favorite);
     }

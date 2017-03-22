@@ -1,5 +1,6 @@
 package com.playgrounds.api.playground.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.hateoas.ResourceSupport;
 
 import java.net.URL;
@@ -26,7 +27,7 @@ public class GeneralRate extends ResourceSupport{
         this.distance = distance;
     }
 
-
+    @JsonIgnore
     public String getPlaygroundId() {
         return id;
     }

@@ -22,7 +22,7 @@ public interface PlaygroundService {
     ResponseEntity<Resource<Playground>> getPlaygroundByLocationAndByName(Double latitude, Double longitude, String playgroundName);
     ResponseEntity<List<GeneralRate>> nearByPlaygrounds(double latitude, double longitude, int maxDistance, String sortBy);
     HttpHeaders reportPlayground(String playground_id, Report report);
-    boolean addImageToPlayground(String playground_id, String user_id, MultipartFile image) throws MalformedURLException;
+    HttpHeaders addImageToPlayground(String playground_id, Image image) throws MalformedURLException;
     byte[] getImage(String image_id);
     GeneralRate getGeneralRate(String playground_id);
 }
