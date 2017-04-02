@@ -13,7 +13,7 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 apply plugin: 'idea'
 
@@ -23,8 +23,8 @@ jar {
 				'Main-Class': 'com.playgrounds.api.DemoApplication'
 		)
 	}
-	baseName = 'playground apiBeta'
-	version = '1.3.0-SNAPSHOT'
+	baseName = 'playgrounds_api'
+	version = '1.4.2-SNAPSHOT'
 
 }
 sourceCompatibility = 1.8

@@ -68,16 +68,16 @@ public class PlaygroundController {
 
     @RequestMapping(value = "/location", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<List<GeneralRate>> getAllPlaygroundsByLocation(@RequestParam(value = "x", required = false) Double latitude,
-                                                                         @RequestParam(value = "y", required = false) Double longitude) throws Exception {
+    public ResponseEntity<List<GeneralRate>> getAllPlaygroundsByLocation(@RequestParam(value = "x") Double latitude,
+                                                                         @RequestParam(value = "y") Double longitude) throws Exception {
         return playgroundService.getPlaygroundsByCity(latitude, longitude);
     }
 
     @RequestMapping(value = "/search", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<Resource<Playground>> searchPlayground(@RequestParam(value = "x") Double latitude,
+    public ResponseEntity<Resource<List<Playground>>> searchPlayground(@RequestParam(value = "x") Double latitude,
                                                                  @RequestParam(value = "y") Double longitude,
-                                                                 @RequestParam(value = "playground") String playgroundName) {
+                                                                 @RequestParam(value = "playground", required = false) String playgroundName) {
         return playgroundService.getPlaygroundByLocationAndByName(latitude, longitude, playgroundName);
     }
 

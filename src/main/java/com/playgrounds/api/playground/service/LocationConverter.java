@@ -16,8 +16,8 @@ public class LocationConverter {
         this.googleRestClient = googleRestClient;
     }
 
-    public  String getCityNameFromCoordinates(Double latitude, Double longitude) {
-        String[] latlon = {Double.toString(latitude),Double.toString(longitude)};
+    public String getCityNameFromCoordinates(Double latitude, Double longitude) {
+        String[] latlon = {Double.toString(latitude), Double.toString(longitude)};
         String locationToEnglish = googleRestClient.findLocation(latlon[0] + "," + latlon[1]);
         return locationToEnglish;
     }

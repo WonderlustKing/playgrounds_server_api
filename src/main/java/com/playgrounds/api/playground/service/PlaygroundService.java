@@ -19,7 +19,7 @@ public interface PlaygroundService {
     ResponseEntity<Resource<Playground>> getPlayground(String playground_id, String user_id);
     ResponseEntity<List<PlaygroundToMap>> getAllPlaygroundsToMap();
     ResponseEntity<List<GeneralRate>> getPlaygroundsByCity(Double latitude, Double longitude);
-    ResponseEntity<Resource<Playground>> getPlaygroundByLocationAndByName(Double latitude, Double longitude, String playgroundName);
+    ResponseEntity<Resource<List<Playground>>> getPlaygroundByLocationAndByName(Double latitude, Double longitude, String playgroundName);
     ResponseEntity<List<GeneralRate>> nearByPlaygrounds(double latitude, double longitude, int maxDistance, String sortBy);
     HttpHeaders reportPlayground(String playground_id, Report report);
     HttpHeaders addImageToPlayground(String playground_id, Image image) throws MalformedURLException;

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,8 +47,16 @@ public class PlaygroundServiceImpl implements PlaygroundService {
 
     @Override
     public HttpHeaders addPlayground(Playground playground) {
+        addCityFromLocation(playground);
         playground = repository.save(playground);
         return addPlaygroundHeaders(playground);
+    }
+
+    private void addCityFromLocation(Playground playground) {
+        double playgroundLatitude = playground.getLocation().getCoordinates()[0];
+        double playgroundLongitude = playground.getLocation().getCoordinates()[1];
+        String city = locationConverter.getCityNameFromCoordinates(playgroundLatitude, playgroundLongitude);
+        playground.setCity(city);
     }
 
     @Override
@@ -101,13 +110,16 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public ResponseEntity<Resource<Playground>> getPlaygroundByLocationAndByName(Double latitude, Double longitude, String playgroundName) {
+    public ResponseEntity<Resource<List<Playground>>> getPlaygroundByLocationAndByName(Double latitude, Double longitude, String playgroundName) {
         String city = locationConverter.getCityNameFromCoordinates(latitude, longitude);
-        Playground playground = repository.findByCityIgnoreCaseAndNameIgnoreCase(city, playgroundName);
-        if (playground == null) {
-            throw new PlaygroundNotFoundException(city, playgroundName);
+        List<Playground> playgrounds = new ArrayList<>();
+        if (playgroundName == null || playgroundName.equals("")) {
+            playgrounds = repository.findByCity(city);
+        } else {
+            Playground playground = repository.findByCityIgnoreCaseAndNameIgnoreCase(city, playgroundName);
+            playgrounds.add(playground);
         }
-        Resource<Playground> playgroundResource = new Resource<>(playground);
+        Resource<List<Playground>> playgroundResource = new Resource<>(playgrounds);
         playgroundResource.add(linkTo(PlaygroundController.class).slash(playgroundResource.getId()).withSelfRel());
         return new ResponseEntity<>(playgroundResource, HttpStatus.OK);
     }
@@ -118,8 +130,10 @@ public class PlaygroundServiceImpl implements PlaygroundService {
         for (GeneralRate generalRate : generalRates) {
             generalRate.add(linkTo(PlaygroundController.class).slash(generalRate.getPlaygroundId()).withSelfRel());
         }
-        Collections.reverse(generalRates);
-        return new ResponseEntity<>(generalRates, HttpStatus.OK);
+        //change returned list to an ArrayList so it can be modifiable
+        List<GeneralRate> modifiableList = new ArrayList<>(generalRates);
+        Collections.reverse(modifiableList);
+        return new ResponseEntity<>(modifiableList, HttpStatus.OK);
     }
 
     @Override

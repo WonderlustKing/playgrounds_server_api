@@ -10,10 +10,9 @@ import javax.validation.constraints.NotNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by christos on 15/5/2016.
@@ -21,7 +20,7 @@ import java.util.List;
 @Document
 public class Playground {
 
-    private static final DecimalFormat df = new DecimalFormat(".##");
+    private static final DecimalFormat df = new DecimalFormat(".#");
 
     @Id
     private String id;
@@ -30,8 +29,6 @@ public class Playground {
     @NotEmpty
     private String name;
 
-    @NotNull
-    @NotEmpty
     private String city;
 
     @NotNull
@@ -43,7 +40,7 @@ public class Playground {
 
     private double popularity =0;
 
-    private Date date_added;
+    private Date date_added = Calendar.getInstance().getTime();
 
     @NotNull
     @NotEmpty
@@ -220,4 +217,5 @@ public class Playground {
     public void setImages(List<URL> images) {
         this.images = images;
     }
+
 }
