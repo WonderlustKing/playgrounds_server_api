@@ -30,7 +30,7 @@ public interface PlaygroundOperations {
     Playground addReport(Report report, Playground playground);
     Rate findRate(String playground_id, String user_id);
     GeneralRate getPlaygroundGeneral(String playground_id);
-    String uploadImage(String playground_id,String user_id,String fileName, MultipartFile file);
+    String uploadImage(String playground_id,String user_id,String fileName, byte[] bytes);
     WriteResult updateImageField(Playground playground, URL imageURL) throws MalformedURLException;
     WriteResult addImageProfile(Playground playground, URL imageURL) throws MalformedURLException;
     InputStream findImageById(String image_id);

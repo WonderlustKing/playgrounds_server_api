@@ -276,7 +276,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     }
 
     @Override
-    public String uploadImage(String playground_id, String user_id, String fileName, MultipartFile file) {
+    public String uploadImage(String playground_id, String user_id, String fileName, byte[] bytes) {
 
         //ApplicationContext ctx =
          //       new AnnotationConfigApplicationContext(MongoConfig.class);
@@ -284,7 +284,6 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
          //       (GridFsOperations) ctx.getBean("gridFsTemplate");
         String result = null;
         try {
-            byte[] bytes = file.getBytes();
             InputStream bis = new ByteArrayInputStream(bytes);
             //InputStream bis = new FileInputStream("src/main/resources/TestFile.txt");
             //BufferedOutputStream stream =

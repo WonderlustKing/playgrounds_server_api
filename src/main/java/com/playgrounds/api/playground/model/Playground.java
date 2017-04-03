@@ -3,8 +3,10 @@ package com.playgrounds.api.playground.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
 import java.net.MalformedURLException;
@@ -50,6 +52,9 @@ public class Playground {
 
     private List<URL> images = new ArrayList<>();
 
+    @Transient
+    private String base64Image;
+
     private int rates_num =0;
 
     private double general_rate =0;
@@ -73,6 +78,13 @@ public class Playground {
     public Playground() throws MalformedURLException {
     }
 
+    public Playground(String name, String address, Location location, String added_by, String base64Image) throws MalformedURLException {
+        this.name = name;
+        this.address = address;
+        this.location = location;
+        this.added_by = added_by;
+        this.base64Image = base64Image;
+    }
 
     public String getId() {
         return id;
@@ -128,6 +140,14 @@ public class Playground {
 
     public void setImageURL(URL imageURL) {
         this.imageURL = imageURL;
+    }
+
+    public String getBase64Image() {
+        return base64Image;
+    }
+
+    public void setBase64Image(String base64Image) {
+        this.base64Image = base64Image;
     }
 
     public double getPopularity() {

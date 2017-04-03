@@ -8,6 +8,7 @@ import com.playgrounds.api.playground.web.PlaygroundNotFoundException;
 import com.playgrounds.api.user.service.UserService;
 import com.playgrounds.api.user.web.UserController;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.net.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -49,7 +51,21 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     public HttpHeaders addPlayground(Playground playground) {
         addCityFromLocation(playground);
         playground = repository.save(playground);
+        try {
+            addImagesIfExist(playground);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return addPlaygroundHeaders(playground);
+    }
+
+    private void addImagesIfExist(Playground playground) throws IOException {
+        if (playground.getBase64Image() != null) {
+            byte[] bytesImage = Base64.decodeBase64(playground.getBase64Image());
+            String uploadImageId = uploadImage(playground, playground.getAdded_by(), bytesImage);
+            URL uploadImageURL = updatePlaygroundImageField(playground, uploadImageId);
+            repository.addImageProfile(playground, uploadImageURL);
+        }
     }
 
     private void addCityFromLocation(Playground playground) {
@@ -100,9 +116,12 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public ResponseEntity<List<GeneralRate>> getPlaygroundsByCity(Double latitude, Double longitude) {
+    public ResponseEntity<List<GeneralRate>> getPlaygroundsByCity(Double latitude, Double longitude, boolean distance) {
         String city = locationConverter.getCityNameFromCoordinates(latitude, longitude);
-        List<GeneralRate> generalRates = repository.findByCityOrderByRateWithDistance(city, latitude, longitude);
+
+        List<GeneralRate> generalRates = distance ?
+                repository.findByCityOrderByRateWithDistance(city, latitude, longitude) :
+                repository.findByCityOrderByRate(city);
         for (GeneralRate generalRate : generalRates) {
             generalRate.add(linkTo(PlaygroundController.class).slash(generalRate.getPlaygroundId()).withSelfRel());
         }
@@ -148,12 +167,12 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public HttpHeaders addImageToPlayground(String playground_id, Image image) throws MalformedURLException {
+    public HttpHeaders addImageToPlayground(String playground_id, Image image) throws IOException {
         if (image == null) throw new RuntimeException("Cant upload null image");
         Playground playground = repository.findById(playground_id);
         if (playground == null) throw new PlaygroundNotFoundException(playground_id);
 
-        String uploadImageId = uploadImage(playground, image.getUserId(), image.getMultipartFile());
+        String uploadImageId = uploadImage(playground, image.getUserId(), image.getMultipartFile().getBytes());
         URL uploadImageURL = updatePlaygroundImageField(playground, uploadImageId);
         if (playground.getImages().size() == 1) {
             repository.addImageProfile(playground, uploadImageURL);
@@ -163,9 +182,9 @@ public class PlaygroundServiceImpl implements PlaygroundService {
         return httpHeaders;
     }
 
-    private String uploadImage(Playground playground, String user_id, MultipartFile image) {
+    private String uploadImage(Playground playground, String user_id, byte[] bytes) throws IOException {
         String fileName = interactor.uploadedImageName(playground);
-        return repository.uploadImage(playground.getId(), user_id, fileName, image);
+        return repository.uploadImage(playground.getId(), user_id, fileName, bytes);
     }
 
     private URL updatePlaygroundImageField(Playground playground, String imageId) throws MalformedURLException{
