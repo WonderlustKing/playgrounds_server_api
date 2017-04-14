@@ -40,6 +40,10 @@ public class Playground {
     @Indexed
     private Location location;
 
+    private long phone;
+
+    private URL website;
+
     private double popularity =0;
 
     private Date date_added = Calendar.getInstance().getTime();
@@ -124,6 +128,22 @@ public class Playground {
 
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public long getPhone() {
+        return phone;
+    }
+
+    public void setPhone(long phone) {
+        this.phone = phone;
+    }
+
+    public URL getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(URL website) {
+        this.website = website;
     }
 
     public LinkedList<Rate> getRate() {

@@ -15,6 +15,8 @@ import java.util.List;
  */
 public interface PlaygroundService {
     HttpHeaders addPlayground(Playground playground);
+    HttpHeaders updatePlayground(Playground playground);
+    void updatePlaygroundOptionalFields(OptionalFields optionalFields);
     HttpHeaders addRate(String playground_id, Rate rate);
     void updateRate(String playground_id, Rate rate);
     ResponseEntity<Resource<Playground>> getPlayground(String playground_id, String user_id);

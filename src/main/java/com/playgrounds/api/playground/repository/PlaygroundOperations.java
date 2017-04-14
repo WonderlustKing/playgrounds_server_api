@@ -16,18 +16,29 @@ import java.util.List;
  */
 public interface PlaygroundOperations {
     @CachePut(value = "playgroundsCache", key = "#result.id")
+    Playground updatePlayground(Playground playground);
+
+    void updateOptionalFields(OptionalFields optionalFields);
+
+    @CachePut(value = "playgroundsCache", key = "#result.id")
     Playground addRate(Playground playground, Rate rate);
+
     @CachePut(value = "playgroundsCache", key = "#result.id")
     Playground updateRate(Playground playground, Rate rate);
+
     @Cacheable(value = "playgroundsCache")
     List<GeneralRate> findByCityOrderByRate(String city);
+
     @Cacheable(value = "playgroundsCache")
     List<GeneralRate> findByCityOrderByRateWithDistance(String city, Double latitude, Double longitude);
+
     @Cacheable("playgroundsCache")
     List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance, String sort);
+
     List<PlaygroundToMap> findAllPlaygroundsToMap();
     @CachePut(value = "playgroundsCache", key = "#result.id")
     Playground addReport(Report report, Playground playground);
+
     Rate findRate(String playground_id, String user_id);
     GeneralRate getPlaygroundGeneral(String playground_id);
     String uploadImage(String playground_id,String user_id,String fileName, byte[] bytes);

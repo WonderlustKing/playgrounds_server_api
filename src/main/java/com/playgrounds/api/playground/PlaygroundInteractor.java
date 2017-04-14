@@ -19,7 +19,7 @@ import java.util.ListIterator;
  */
 public class PlaygroundInteractor {
     private Playground playground;
-    private final static String hostURL = "http://localhost:8080/playgrounds/images/";
+    private final static String hostURL = "http://83.212.122.113:8080/playgrounds/images/";
     //private PlaygroundService service;
     public PlaygroundInteractor(){
     }

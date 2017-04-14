@@ -39,6 +39,38 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     private GridFsOperations gridOperations;
 
     @Override
+    public Playground updatePlayground(Playground playground) {
+        Criteria where = where("id").is(playground.getId());
+        Query query = Query.query(where);
+        Update update = new Update();
+        update.set("name", playground.getName());
+        update.set("address", playground.getAddress());
+        update.set("location", playground.getLocation());
+        update.set("phone", playground.getPhone());
+        if (playground.getWebsite() == null || playground.getWebsite().toString().equals("")) {
+            update.unset("website");
+        } else {
+            update.set("website", playground.getWebsite());
+        }
+        mongo.updateFirst(query, update, Playground.class);
+        return playground;
+    }
+
+    @Override
+    public void updateOptionalFields(OptionalFields optionalFields) {
+        Criteria where = where("id").is(optionalFields.getId());
+        Query query = Query.query(where);
+        Update update = new Update();
+        if (optionalFields.getPhone() != 0) {
+            update.set("phone", optionalFields.getPhone());
+        }
+        if (optionalFields.getWebsite() != null) {
+            update.set("website", optionalFields.getWebsite());
+        }
+        mongo.updateFirst(query, update, Playground.class);
+    }
+
+    @Override
     public Playground addRate(Playground playground, Rate rate) {
         Criteria where = where("id").is(playground.getId());
         Query query = Query.query(where);

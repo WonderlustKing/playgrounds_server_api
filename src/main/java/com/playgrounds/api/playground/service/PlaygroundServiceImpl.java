@@ -59,6 +59,25 @@ public class PlaygroundServiceImpl implements PlaygroundService {
         return addPlaygroundHeaders(playground);
     }
 
+    @Override
+    public HttpHeaders updatePlayground(Playground playground) {
+        Playground playgroundFromDb = repository.findById(playground.getId());
+        if (playgroundFromDb == null) {
+            throw new PlaygroundNotFoundException(playground.getId());
+        }
+        repository.updatePlayground(playground);
+        return addPlaygroundHeaders(playground);
+    }
+
+    @Override
+    public void updatePlaygroundOptionalFields(OptionalFields optionalFields) {
+        Playground playgroundFromDb = repository.findById(optionalFields.getId());
+        if (playgroundFromDb == null) {
+            throw new PlaygroundNotFoundException(optionalFields.getId());
+        }
+        repository.updateOptionalFields(optionalFields);
+    }
+
     private void addImagesIfExist(Playground playground) throws IOException {
         if (playground.getBase64Image() != null) {
             byte[] bytesImage = Base64.decodeBase64(playground.getBase64Image());

@@ -38,6 +38,18 @@ public class PlaygroundController {
         return playgroundService.addPlayground(playground);
     }
 
+    @RequestMapping(method = RequestMethod.PUT, consumes = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    public HttpHeaders updatePlayground(@RequestBody @Valid Playground playground) {
+        return playgroundService.updatePlayground(playground);
+    }
+
+    @RequestMapping(value = "/optionalFields",method = RequestMethod.PUT, consumes = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePlaygroundOptionalFields(@RequestBody OptionalFields playground) {
+        playgroundService.updatePlaygroundOptionalFields(playground);
+    }
+
     @RequestMapping(value = "/coordinates", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<List<PlaygroundToMap>> getPlaygroundsCoordinates() {
