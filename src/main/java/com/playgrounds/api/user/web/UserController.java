@@ -1,5 +1,6 @@
 package com.playgrounds.api.user.web;
 
+import com.playgrounds.api.playground.model.FavoriteGeneralRate;
 import com.playgrounds.api.playground.model.GeneralRate;
 import com.playgrounds.api.playground.model.Playground;
 import com.playgrounds.api.playground.service.PlaygroundService;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,15 +65,26 @@ public class UserController {
 
     @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders addFavorite(@RequestBody @Valid Favorite favorite, @PathVariable("user_id") String userId){
-        //Playground playground = playgroundService.getPlayground(favorite.getPlayground(),null);
+    public HttpHeaders addFavorite(@RequestBody Favorite favorite, @PathVariable("user_id") String userId){
         return userService.addFavorite(userId, favorite);
     }
 
     @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<List<GeneralRate>> getUserFavorites(@PathVariable("user_id") String userId){
+    public ResponseEntity<List<FavoriteGeneralRate>> getUserFavorites(@PathVariable("user_id") String userId){
         return userService.getUserFavorites(userId);
+    }
+
+    @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.DELETE, consumes = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    public void removeFavorite(@RequestBody Favorite favorite, @PathVariable("user_id") String userId){
+        userService.removeFavorite(userId, favorite);
+    }
+
+    @RequestMapping(value = "/images/{image_id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public byte[] getPlaygroundImage(@PathVariable("image_id") String image_id) {
+        return playgroundService.getImage(image_id);
     }
 
 }

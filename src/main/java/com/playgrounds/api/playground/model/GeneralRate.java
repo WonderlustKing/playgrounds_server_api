@@ -5,9 +5,7 @@ import org.springframework.hateoas.ResourceSupport;
 
 import java.net.URL;
 
-/**
- * Created by christos on 28/5/2016.
- */
+
 public class GeneralRate extends ResourceSupport{
 
     private String id;

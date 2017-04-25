@@ -57,6 +57,7 @@ public class GoogleRestClient {
 
         RequestLocation requestLocation = restTemplate.getForObject(builder.toUriString(), RequestLocation.class);
         logger.info(requestLocation.getResults().get(0).getAddress_components().size() + "");
+        String failOverLocation = "";
         List<AddressComponent> addressComponents = requestLocation.getResults().get(0).getAddress_components();
         for(AddressComponent addressComponent : addressComponents){
             List<String> types = addressComponent.getTypes();
@@ -65,8 +66,12 @@ public class GoogleRestClient {
                     logger.info(addressComponent.getLong_name().toLowerCase());
                     return addressComponent.getLong_name().toLowerCase();
                 }
+                else if (type.equals("political") && failOverLocation.equals("")) {
+                    failOverLocation = addressComponent.getLong_name().toLowerCase();
+                    logger.info("failoverLocationName", failOverLocation);
+                }
             }
         }
-        return requestLocation.getStatus();
+        return failOverLocation;
     }
 }

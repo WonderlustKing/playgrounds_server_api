@@ -9,9 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by christos on 15/5/2016.
- */
+
 @Document
 public class User {
 

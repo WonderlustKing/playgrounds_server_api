@@ -1,21 +1,7 @@
 package com.playgrounds.api.playground.model;
 
-import com.playgrounds.api.user.validator.UserExist;
 
-import java.util.Calendar;
-import java.util.Date;
-
-/**
- * Created by christos on 15/5/2016.
- */
-
-
-public class Rate {
-
-    @UserExist(message = "User not exist")
-    private String user;
-
-    private Date date = Calendar.getInstance().getTime();
+public class RateFields {
 
     private double general_rate;
 
@@ -27,16 +13,12 @@ public class Rate {
 
     private double kids_supervision;
 
-    private String comment;
-
-
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
+    public RateFields(double general_rate, double environment, double equipment, double prices, double kids_supervision) {
+        this.general_rate = general_rate;
+        this.environment = environment;
+        this.equipment = equipment;
+        this.prices = prices;
+        this.kids_supervision = kids_supervision;
     }
 
     public double getGeneral_rate() {
@@ -45,18 +27,6 @@ public class Rate {
 
     public void setGeneral_rate(double general_rate) {
         this.general_rate = general_rate;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public Date getDate() {
-        return date;
     }
 
     public double getEnvironment() {
@@ -90,6 +60,5 @@ public class Rate {
     public void setKids_supervision(double kids_supervision) {
         this.kids_supervision = kids_supervision;
     }
-
 
 }

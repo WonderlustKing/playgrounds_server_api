@@ -65,7 +65,12 @@ public class PlaygroundServiceImpl implements PlaygroundService {
         if (playgroundFromDb == null) {
             throw new PlaygroundNotFoundException(playground.getId());
         }
-        repository.updatePlayground(playground);
+        playground = repository.updatePlayground(playground);
+        try {
+            addImagesIfExist(playground);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return addPlaygroundHeaders(playground);
     }
 
@@ -95,19 +100,29 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public HttpHeaders addRate(String playground_id, Rate rate) {
+    public RateFields addRate(String playground_id, Rate rate) {
         Playground playground = getPlaygroundById(playground_id);
         if (playground == null) throw new PlaygroundNotFoundException(playground_id);
         interactor.checkIfRateExist(playground, rate);
         playground = repository.addRate(playground, rate);
-        return addPlaygroundHeaders(playground);
+        return getUpdatedRates(playground);
     }
 
     @Override
-    public void updateRate(String playground_id, Rate rate) {
+    public RateFields updateRate(String playground_id, Rate rate) {
         Playground playground = getPlaygroundById(playground_id);
         if (playground == null) throw new PlaygroundNotFoundException(playground_id);
-        repository.updateRate(playground, rate);
+        playground = repository.updateRate(playground, rate);
+        return getUpdatedRates(playground);
+    }
+
+    private RateFields getUpdatedRates(Playground playground) {
+        RateFields updatedRates = new RateFields(playground.getGeneral_rate(),
+                playground.getGeneral_environment(),
+                playground.getGeneral_equipment(),
+                playground.getGeneral_prices(),
+                playground.getGeneral_kids_supervision());
+        return updatedRates;
     }
 
     @Override
@@ -186,18 +201,24 @@ public class PlaygroundServiceImpl implements PlaygroundService {
     }
 
     @Override
-    public HttpHeaders addImageToPlayground(String playground_id, Image image) throws IOException {
-        if (image == null) throw new RuntimeException("Cant upload null image");
+    public HttpHeaders addImageToPlayground(String playground_id, List<Image> images) throws IOException {
         Playground playground = repository.findById(playground_id);
         if (playground == null) throw new PlaygroundNotFoundException(playground_id);
 
-        String uploadImageId = uploadImage(playground, image.getUserId(), image.getMultipartFile().getBytes());
-        URL uploadImageURL = updatePlaygroundImageField(playground, uploadImageId);
-        if (playground.getImages().size() == 1) {
-            repository.addImageProfile(playground, uploadImageURL);
+        if (images == null || images.size() == 0 ) {
+            throw new RuntimeException("Can't upload null image");
+        }
+        boolean isProfileImageUpdated = false;
+        for (Image image : images) {
+            String uploadImageId = uploadImage(playground, image.getUserId(), image.getMultipartFile().getBytes());
+            URL uploadImageURL = updatePlaygroundImageField(playground, uploadImageId);
+            if (playground.getImages().size() == 1 && !isProfileImageUpdated) {
+                repository.addImageProfile(playground, uploadImageURL);
+                isProfileImageUpdated = true;
+            }
         }
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setLocation(linkTo(PlaygroundController.class).slash("images").slash(uploadImageId).toUri());
+        //httpHeaders.setLocation(linkTo(PlaygroundController.class).slash("images").slash(uploadImageId).toUri());
         return httpHeaders;
     }
 

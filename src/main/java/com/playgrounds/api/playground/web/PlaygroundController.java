@@ -65,14 +65,14 @@ public class PlaygroundController {
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.POST, consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public HttpHeaders addRate(@RequestBody @Valid Rate rate, @PathVariable("playground_id") String id) {
+    public RateFields addRate(@RequestBody @Valid Rate rate, @PathVariable("playground_id") String id) {
         return playgroundService.addRate(id, rate);
     }
 
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.PUT, consumes = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public void updateRate(@RequestBody @Valid Rate rate, @PathVariable("playground_id") String id) {
-        playgroundService.updateRate(id, rate);
+    public RateFields updateRate(@RequestBody @Valid Rate rate, @PathVariable("playground_id") String id) {
+       return playgroundService.updateRate(id, rate);
     }
 
 
@@ -109,12 +109,12 @@ public class PlaygroundController {
     }
 
 
-    @RequestMapping(value = "/upload/{playground_id}", method = RequestMethod.POST, produces = "text/plain")
+    @RequestMapping(value = "/upload/{playground_id}", method = RequestMethod.POST, produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public HttpHeaders uploadImage(@PathVariable("playground_id") String playground_id,
-                                    @RequestBody Image image) throws IOException {
-        //userService.userExist(userId);
-        return playgroundService.addImageToPlayground(playground_id, image);
+                                    @RequestBody List<Image> images) throws IOException {
+        //userService.findUser(userId);
+        return playgroundService.addImageToPlayground(playground_id, images);
     }
 
     @RequestMapping(value = "/images/{image_id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)

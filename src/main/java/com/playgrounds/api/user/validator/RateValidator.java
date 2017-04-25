@@ -35,7 +35,7 @@ public class RateValidator implements Validator {
 
     private String userIdExist(String userId) {
         try {
-            return userService.userExist(userId).getId();
+            return userService.findUser(userId).getId();
         } catch (UserNotFoundException e) {
             return null;
         }

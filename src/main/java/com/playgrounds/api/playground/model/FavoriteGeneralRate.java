@@ -2,27 +2,21 @@ package com.playgrounds.api.playground.model;
 
 import org.springframework.hateoas.ResourceSupport;
 
-/**
- * Created by chris on 9/1/2017.
- */
-public class PlaygroundToMap extends ResourceSupport {
+import java.net.URL;
 
+public class FavoriteGeneralRate extends ResourceSupport {
 
     private String playground_id;
     private String name;
+    private double rate =0;
+    private URL image;
     private double[] coordinates;
 
-    public PlaygroundToMap(String playground_id, String name, double[] coordinates) {
-        this.playground_id = playground_id;
-        this.name = name;
-        this.coordinates = coordinates;
-    }
-
-    public String getPlaygroundId() {
+    public String getPlayground_id() {
         return playground_id;
     }
 
-    public void setPlaygroundId(String id) {
+    public void setPlayground_id(String id) {
         this.playground_id = id;
     }
 
@@ -34,6 +28,22 @@ public class PlaygroundToMap extends ResourceSupport {
         this.name = name;
     }
 
+    public double getRate() {
+        return rate;
+    }
+
+    public void setRate(double rate) {
+        this.rate = rate;
+    }
+
+    public URL getImage() {
+        return image;
+    }
+
+    public void setImage(URL image) {
+        this.image = image;
+    }
+
     public double[] getCoordinates() {
         return coordinates;
     }
@@ -41,5 +51,4 @@ public class PlaygroundToMap extends ResourceSupport {
     public void setCoordinates(double[] coordinates) {
         this.coordinates = coordinates;
     }
-
 }

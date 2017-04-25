@@ -57,7 +57,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     }
 
     @Override
-    public void updateOptionalFields(OptionalFields optionalFields) {
+    public WriteResult updateOptionalFields(OptionalFields optionalFields) {
         Criteria where = where("id").is(optionalFields.getId());
         Query query = Query.query(where);
         Update update = new Update();
@@ -67,7 +67,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         if (optionalFields.getWebsite() != null) {
             update.set("website", optionalFields.getWebsite());
         }
-        mongo.updateFirst(query, update, Playground.class);
+        return mongo.updateFirst(query, update, Playground.class);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         update1.set("general_kids_supervision", playground1.getGeneral_kids_supervision());
         mongo.updateFirst(query, update1, Playground.class);
 
-        return playground;
+        return playground1;
     }
 
     @Override
@@ -152,7 +152,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         update1.set("general_kids_supervision", playground1.getGeneral_kids_supervision());
         mongo.updateFirst(query, update1, Playground.class);
 
-        return playground;
+        return playground1;
 
     }
 
@@ -210,6 +210,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         Distance distance=new Distance(maxDistance,Metrics.KILOMETERS);
         //Criteria where = where("location").nearSphere(new GeoJsonPoint(longitude, latitude)).maxDistance(maxDistance);
         NearQuery query = NearQuery.near(longitude,latitude).maxDistance(distance).spherical(true);
+
         query.num(25);
 
         //return mongo.find(query,Playground.class);
@@ -258,8 +259,9 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     public List<PlaygroundToMap> findAllPlaygroundsToMap() {
         Aggregation aggregation = newAggregation(
                 group("id")
-                .first("name").as("name")
-                .first("location.coordinates").as("coordinates")
+                        .first("id").as("playground_id")
+                        .first("name").as("name")
+                        .first("location.coordinates").as("coordinates")
         );
 
         AggregationResults<PlaygroundToMap> results = mongo.aggregate(aggregation, Playground.class, PlaygroundToMap.class);
@@ -308,31 +310,32 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     }
 
     @Override
+    public FavoriteGeneralRate getFavoriteGeneral(String playground_id) {
+        Aggregation agg = newAggregation(
+                match(where("id").is(playground_id)),
+                group("id")
+                        .first("id").as("playground_id")
+                        .first("name").as("name")
+                        .first("general_rate").as("rate")
+                        .first("imageURL").as("image")
+                        .first("location.coordinates").as("coordinates")
+
+        );
+        AggregationResults<FavoriteGeneralRate> groupResults = mongo.aggregate(agg, Playground.class, FavoriteGeneralRate.class);
+        return groupResults.getUniqueMappedResult();
+    }
+
+    @Override
     public String uploadImage(String playground_id, String user_id, String fileName, byte[] bytes) {
 
-        //ApplicationContext ctx =
-         //       new AnnotationConfigApplicationContext(MongoConfig.class);
-       // GridFsOperations gridOperations =
-         //       (GridFsOperations) ctx.getBean("gridFsTemplate");
         String result = null;
         try {
             InputStream bis = new ByteArrayInputStream(bytes);
-            //InputStream bis = new FileInputStream("src/main/resources/TestFile.txt");
-            //BufferedOutputStream stream =
-              //      new BufferedOutputStream(new FileOutputStream(new File("name")));
-            //stream.write(bytes);
-            //stream.close();
-
-            //GridFS gfsPhoto = new GridFS()
-            //GridFSInputFile gfsFile = gfsPhoto.createFile(bytes);
-            //gfsFile.setFilename("FileName");
-            //gfsFile.save();
             DBObject metaData = new BasicDBObject();
             metaData.put("playground",playground_id);
-            metaData.put("user", "Chris");
+            metaData.put("user", user_id);
             GridFSFile upload_image = gridOperations.store(bis,fileName,"image/jpeg");
             result = upload_image.getId().toString();
-
         } catch (Exception e) {
             e.printStackTrace();
             return result;
