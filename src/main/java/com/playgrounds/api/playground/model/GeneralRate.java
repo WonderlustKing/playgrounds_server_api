@@ -11,16 +11,18 @@ public class GeneralRate extends ResourceSupport{
     private String id;
     private String name;
     private double rate =0;
+    private double[] coordinates;
     private URL image;
     private Double distance = null;
 
     public GeneralRate(){
     }
 
-    public GeneralRate(String id, String name, double rate, URL image, Double distance){
+    public GeneralRate(String id, String name, double rate, double[] coordinates, URL image, Double distance){
         this.id = id;
         this.name = name;
         this.rate = rate;
+        this.coordinates = coordinates;
         this.image = image;
         this.distance = distance;
     }
@@ -47,6 +49,14 @@ public class GeneralRate extends ResourceSupport{
 
     public void setRate(double rate) {
         this.rate = rate;
+    }
+
+    public double[] getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(double[] coordinates) {
+        this.coordinates = coordinates;
     }
 
     public URL getImage() {

@@ -4,9 +4,6 @@ import com.mongodb.DBObject;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperationContext;
 
-/**
- * Created by christos on 4/7/2016.
- */
 public class CustomGroupOperation implements AggregationOperation {
     private DBObject operation;
 

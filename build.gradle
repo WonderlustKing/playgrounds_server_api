@@ -24,7 +24,7 @@ jar {
 		)
 	}
 	baseName = 'playgrounds_api'
-	version = '1.4.19-SNAPSHOT'
+	version = '1.4.20-SNAPSHOT'
 
 }
 sourceCompatibility = 1.8

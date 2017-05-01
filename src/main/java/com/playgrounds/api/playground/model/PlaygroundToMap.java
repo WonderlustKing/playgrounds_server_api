@@ -2,9 +2,7 @@ package com.playgrounds.api.playground.model;
 
 import org.springframework.hateoas.ResourceSupport;
 
-/**
- * Created by chris on 9/1/2017.
- */
+
 public class PlaygroundToMap extends ResourceSupport {
 
 

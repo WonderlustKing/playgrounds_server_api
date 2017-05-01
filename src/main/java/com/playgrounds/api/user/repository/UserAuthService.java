@@ -11,9 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by christos on 4/8/2016.
- */
+
 public class UserAuthService implements UserDetailsService {
     private UserRepository userRepository;
 

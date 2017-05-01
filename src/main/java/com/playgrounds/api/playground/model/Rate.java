@@ -5,11 +5,6 @@ import com.playgrounds.api.user.validator.UserExist;
 import java.util.Calendar;
 import java.util.Date;
 
-/**
- * Created by christos on 15/5/2016.
- */
-
-
 public class Rate {
 
     @UserExist(message = "User not exist")

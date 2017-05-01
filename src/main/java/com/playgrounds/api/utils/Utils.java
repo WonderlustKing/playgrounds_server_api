@@ -3,10 +3,10 @@ package com.playgrounds.api.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by christos on 3/5/17.
- */
+
 public class Utils {
+
+    // Unused util for convert greek char to english char
 
     private static final Map<Character, Character> GREEK_TO_ENGLISH = new HashMap<>();
     static {

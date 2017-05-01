@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-/**
- * Created by christos on 3/14/17.
- */
+
 public class CheckRateValidator implements ConstraintValidator<UserExist, String>
 {
     @Autowired

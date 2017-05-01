@@ -11,9 +11,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
-/**
- * Created by christos on 20/8/2016.
- */
+
 public class UserRepositoryImpl implements UserOperations {
 
     @Autowired

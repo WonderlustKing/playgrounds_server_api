@@ -3,9 +3,7 @@ package com.playgrounds.api.playground.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by christos on 3/12/17.
- */
+
 @Component
 public class LocationConverter {
 

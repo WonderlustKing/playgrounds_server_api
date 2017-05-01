@@ -28,9 +28,7 @@ import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-/**
- * Created by chris on 29/9/2016.
- */
+
 @Component
 public class PlaygroundServiceImpl implements PlaygroundService {
 

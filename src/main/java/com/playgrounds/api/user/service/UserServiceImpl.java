@@ -25,9 +25,7 @@ import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-/**
- * Created by chris on 30/9/2016.
- */
+
 @Component
 public class UserServiceImpl implements UserService {
 
@@ -101,17 +99,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<List<FavoriteGeneralRate>> getUserFavorites(String userId) {
+    public ResponseEntity<List<GeneralRate>> getUserFavorites(String userId) {
         User user = findUser(userId);
 
-        List<FavoriteGeneralRate> playgrounds_list = new ArrayList<>();
+        List<GeneralRate> playgrounds_list = new ArrayList<>();
         for(Favorite favorite : user.getFavorites()){
-            FavoriteGeneralRate favoriteGeneralRate = playgroundRepository.getFavoriteGeneral(favorite.getPlayground());
-            favoriteGeneralRate.add(linkTo(PlaygroundController.class).slash(favorite.getPlayground()).withSelfRel());
-            playgrounds_list.add(favoriteGeneralRate);
+            GeneralRate generalRate = playgroundRepository.getFavoriteGeneral(favorite.getPlayground());
+            generalRate.add(linkTo(PlaygroundController.class).slash(favorite.getPlayground()).withSelfRel());
+            playgrounds_list.add(generalRate);
         }
 
-        ResponseEntity<List<FavoriteGeneralRate>> responseEntity = new ResponseEntity<>(playgrounds_list, HttpStatus.OK);
+        ResponseEntity<List<GeneralRate>> responseEntity = new ResponseEntity<>(playgrounds_list, HttpStatus.OK);
         return responseEntity;
     }
 

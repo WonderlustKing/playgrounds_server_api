@@ -9,9 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-/**
- * Created by christos on 3/11/17.
- */
+
 
 @Component
 @ComponentScan

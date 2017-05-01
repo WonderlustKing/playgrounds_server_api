@@ -18,5 +18,5 @@ public interface UserService {
     List<User> getAllUsers();
     HttpHeaders addFavorite(String userId, Favorite favorite);
     void removeFavorite(String userId, Favorite favorite);
-    ResponseEntity<List<FavoriteGeneralRate>> getUserFavorites(String userId);
+    ResponseEntity<List<GeneralRate>> getUserFavorites(String userId);
 }

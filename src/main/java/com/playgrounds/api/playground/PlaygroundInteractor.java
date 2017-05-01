@@ -14,9 +14,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.ListIterator;
 
-/**
- * Created by chris on 29/9/2016.
- */
+
 public class PlaygroundInteractor {
     private Playground playground;
     private final static String hostURL = "http://83.212.122.113:8080/playgrounds/images/";

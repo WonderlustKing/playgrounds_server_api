@@ -3,9 +3,7 @@ package com.playgrounds.api.playground.model;
 import com.playgrounds.api.user.validator.UserExist;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * Created by christos on 3/15/17.
- */
+
 public class Image {
 
     @UserExist(message = "User not exist")

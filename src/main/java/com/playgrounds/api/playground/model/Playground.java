@@ -16,9 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * Created by christos on 15/5/2016.
- */
+
 @Document
 public class Playground {
 

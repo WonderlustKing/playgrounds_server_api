@@ -22,9 +22,7 @@ import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-/**
- * Created by christos on 17/5/2016.
- */
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -71,7 +69,7 @@ public class UserController {
 
     @RequestMapping(value = "/{user_id}/favorites", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity<List<FavoriteGeneralRate>> getUserFavorites(@PathVariable("user_id") String userId){
+    public ResponseEntity<List<GeneralRate>> getUserFavorites(@PathVariable("user_id") String userId){
         return userService.getUserFavorites(userId);
     }
 

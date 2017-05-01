@@ -12,9 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-/**
- * Created by christos on 16/5/2016.
- */
+
 public interface PlaygroundOperations {
     //@CacheEvict(value = "playgroundsCache", key = "#result.id")
     Playground updatePlayground(Playground playground);
@@ -43,7 +41,7 @@ public interface PlaygroundOperations {
 
     Rate findRate(String playground_id, String user_id);
     GeneralRate getPlaygroundGeneral(String playground_id);
-    FavoriteGeneralRate getFavoriteGeneral(String playground_id);
+    GeneralRate getFavoriteGeneral(String playground_id);
     String uploadImage(String playground_id,String user_id,String fileName, byte[] bytes);
     WriteResult updateImageField(Playground playground, URL imageURL) throws MalformedURLException;
     WriteResult addImageProfile(Playground playground, URL imageURL) throws MalformedURLException;

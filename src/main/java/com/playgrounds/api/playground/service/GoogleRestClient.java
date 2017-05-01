@@ -15,9 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
-/**
- * Created by chris on 17/12/2016.
- */
+
 @Configuration
 @ComponentScan
 public class GoogleRestClient {
@@ -46,10 +44,11 @@ public class GoogleRestClient {
         return distance;
     }
 
+
     public String findLocation(String latlng) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(ENDPOINT2)
                 .queryParam("sensor", "true")
-                .queryParam("language", "english")
+                .queryParam("language", "en")
                 .queryParam("latlng", latlng)
                 .queryParam("key","AIzaSyA8qu3YsDcHO7Q1KuRA0G7qvRs6q260M8g");
 

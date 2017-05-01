@@ -10,9 +10,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-/**
- * Created by chris on 29/9/2016.
- */
+
 public interface PlaygroundService {
     HttpHeaders addPlayground(Playground playground);
     HttpHeaders updatePlayground(Playground playground);

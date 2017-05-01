@@ -11,9 +11,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-/**
- * Created by christos on 3/14/17.
- */
+
 @Documented
 @Constraint(validatedBy = CheckRateValidator.class)
 @Target({ METHOD, FIELD, ANNOTATION_TYPE })

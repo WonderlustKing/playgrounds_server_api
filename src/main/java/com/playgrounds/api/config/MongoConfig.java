@@ -10,9 +10,7 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Created by christos on 15/5/2016.
- */
+
 @Configuration
 @EnableMongoRepositories(value = {"com.playgrounds.api.playground.repository", "com.playgrounds.api.user.repository"})
 public class MongoConfig extends AbstractMongoConfiguration{

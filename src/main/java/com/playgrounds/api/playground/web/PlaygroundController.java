@@ -16,20 +16,15 @@ import java.io.IOException;
 import java.util.*;
 
 
-/**
- * Created by christos on 17/5/2016.
- */
 @RestController
 @RequestMapping("/playgrounds")
 public class PlaygroundController {
 
     private PlaygroundService playgroundService;
-    private UserService userService;
 
     @Autowired
-    public PlaygroundController(PlaygroundService playgroundService, UserService userService) {
+    public PlaygroundController(PlaygroundService playgroundService) {
         this.playgroundService = playgroundService;
-        this.userService = userService;
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json")
@@ -44,7 +39,7 @@ public class PlaygroundController {
         return playgroundService.updatePlayground(playground);
     }
 
-    @RequestMapping(value = "/optionalFields",method = RequestMethod.PUT, consumes = "application/json")
+    @RequestMapping(value = "/optionalFields", method = RequestMethod.PUT, consumes = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public void updatePlaygroundOptionalFields(@RequestBody OptionalFields playground) {
         playgroundService.updatePlaygroundOptionalFields(playground);
@@ -72,7 +67,7 @@ public class PlaygroundController {
     @RequestMapping(value = "/rate/{playground_id}", method = RequestMethod.PUT, consumes = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public RateFields updateRate(@RequestBody @Valid Rate rate, @PathVariable("playground_id") String id) {
-       return playgroundService.updateRate(id, rate);
+        return playgroundService.updateRate(id, rate);
     }
 
 
@@ -87,8 +82,8 @@ public class PlaygroundController {
     @RequestMapping(value = "/search", method = RequestMethod.GET, produces = "application/json")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ResponseEntity<Resource<List<Playground>>> searchPlayground(@RequestParam(value = "x") Double latitude,
-                                                                 @RequestParam(value = "y") Double longitude,
-                                                                 @RequestParam(value = "playground", required = false) String playgroundName) {
+                                                                       @RequestParam(value = "y") Double longitude,
+                                                                       @RequestParam(value = "playground", required = false) String playgroundName) {
         return playgroundService.getPlaygroundByLocationAndByName(latitude, longitude, playgroundName);
     }
 
@@ -112,7 +107,7 @@ public class PlaygroundController {
     @RequestMapping(value = "/upload/{playground_id}", method = RequestMethod.POST, produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     public HttpHeaders uploadImage(@PathVariable("playground_id") String playground_id,
-                                    @RequestBody List<Image> images) throws IOException {
+                                   @RequestBody List<Image> images) throws IOException {
         //userService.findUser(userId);
         return playgroundService.addImageToPlayground(playground_id, images);
     }

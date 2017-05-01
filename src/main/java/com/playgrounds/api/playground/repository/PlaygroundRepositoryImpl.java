@@ -6,6 +6,7 @@ import com.mongodb.WriteResult;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 import com.playgrounds.api.playground.model.*;
+import org.apache.batik.ext.awt.image.spi.ImageWriterParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.*;
@@ -27,9 +28,7 @@ import java.util.List;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
-/**
- * Created by christos on 16/5/2016.
- */
+
 public class PlaygroundRepositoryImpl implements PlaygroundOperations {
 
     @Autowired
@@ -165,7 +164,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                 group("id")
                         .first("name").as("name")
                         .first("popularity").as("popularity")
-                        //.first("location.coordinates").as("coordinates")
+                        .first("location.coordinates").as("coordinates")
                         //.first("date_added").as("date_added")
                         .first("general_rate").as("rate")
                         .first("imageURL").as("image"),
@@ -191,7 +190,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         .addToSet("distance").as("distance")
                         .first("name").as("name")
                         .first("popularity").as("popularity")
-                        //.first("location.coordinates").as("coordinates")
+                        .first("location.coordinates").as("coordinates")
                         //.first("date_added").as("date_added")
                         .first("general_rate").as("rate")
                         .first("imageURL").as("image"),
@@ -208,19 +207,11 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     @Override
     public List<GeneralRate> nearMePlaygrounds(double longitude, double latitude, double maxDistance, String sort) {
         Distance distance=new Distance(maxDistance,Metrics.KILOMETERS);
-        //Criteria where = where("location").nearSphere(new GeoJsonPoint(longitude, latitude)).maxDistance(maxDistance);
         NearQuery query = NearQuery.near(longitude,latitude).maxDistance(distance).spherical(true);
 
         query.num(25);
 
-        //return mongo.find(query,Playground.class);
         Aggregation agg;
-
-        /*
-        Aggregation agg1 = newAggregation(geoNear(query,"distance"));
-        AggregationResults<LocationDistance> groupDistanceResults = mongo.aggregate(agg1, Playground.class , LocationDistance.class);
-        List<LocationDistance> distanceResults = groupDistanceResults.getMappedResults();
-        */
 
         if(sort.equals("popularity")) {
             agg = newAggregation(
@@ -229,7 +220,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                             .addToSet("distance").as("distance")
                             .first("name").as("name")
                             .first("general_rate").as("rate")
-                            //.first("location.coordinates").as("coordinates")
+                            .first("location.coordinates").as("coordinates")
                             .first("popularity").as("popularity")
                             .first("imageURL").as("image"),
                     sort(Sort.Direction.ASC, "popularity")
@@ -241,7 +232,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                             .addToSet("distance").as("distance")
                             .first("name").as("name")
                             .first("general_rate").as("rate")
-                            //.first("location.coordinates").as("coordinates")
+                            .first("location.coordinates").as("coordinates")
                             .first("imageURL").as("image"),
                     sort(Sort.Direction.DESC, "distance")
             );
@@ -299,7 +290,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         .first("name").as("name")
                         .first("popularity").as("popularity")
                         .first("general_rate").as("rate")
-                        //.first("location.coordinates").as("coordinates")
+                        .first("location.coordinates").as("coordinates")
 
         );
 
@@ -310,7 +301,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
     }
 
     @Override
-    public FavoriteGeneralRate getFavoriteGeneral(String playground_id) {
+    public GeneralRate getFavoriteGeneral(String playground_id) {
         Aggregation agg = newAggregation(
                 match(where("id").is(playground_id)),
                 group("id")
@@ -321,7 +312,7 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
                         .first("location.coordinates").as("coordinates")
 
         );
-        AggregationResults<FavoriteGeneralRate> groupResults = mongo.aggregate(agg, Playground.class, FavoriteGeneralRate.class);
+        AggregationResults<GeneralRate> groupResults = mongo.aggregate(agg, Playground.class, GeneralRate.class);
         return groupResults.getUniqueMappedResult();
     }
 
@@ -375,54 +366,6 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
         if(result == null ) return null;
         return result.getInputStream();
 
-    }
-
-
-    private CustomGroupOperation popularity(){
-        DBObject myProject = (DBObject)new BasicDBObject(
-                "$project", new BasicDBObject(
-                "id","$_id"
-        ).append("name", "$name").append("rate","$rate").append(
-                "suntelestis", new BasicDBObject(
-                        "$cond",new Object[]{
-                        new BasicDBObject(
-                                "$gte", new Object[]{
-                                "$rate",4
-                        }),
-                        new BasicDBObject("$divide",new Object[]{
-                                "$num_rates",2
-                        }), // if true
-                        new BasicDBObject(
-                                "$cond",new Object[]{
-                                new BasicDBObject(
-                                        "$gte", new Object[]{
-                                        "$rate",3
-                                }),
-                                new BasicDBObject("$divide",new Object[]{
-                                        "$num_rates",1.5
-                                }),
-                                new BasicDBObject(
-                                        "$cond",new Object[]{
-                                        new BasicDBObject(
-                                                "$gte", new Object[]{
-                                                "$rate",2
-                                        }),
-                                        new BasicDBObject("$divide",new Object[]{
-                                                "$num_rates", 1
-                                        }),2
-                                })
-                        }
-
-                        ) // if false
-                }
-                )
-        ).append("logarithmos",new BasicDBObject("$ln", new Object[]{
-                "$suntelestis"
-        })).append("popularity", new BasicDBObject("$multiply", new Object[]{
-                "$logarithmos","$rate"
-        })));
-
-        return new CustomGroupOperation(myProject);
     }
 
     private CustomGroupOperation score(){
@@ -493,80 +436,6 @@ public class PlaygroundRepositoryImpl implements PlaygroundOperations {
 
         return new CustomGroupOperation(myProject);
     }
-
-    private CustomGroupOperation unrate(){
-        DBObject myProject = (DBObject)new BasicDBObject(
-                "$project", new BasicDBObject(
-                "name","$name").append(
-                "rate", new BasicDBObject(
-                "$ifNull", new Object[]{
-                "$rate", new Object[]{
-                        "general_rate", 0
-                        ,"environment", 0
-                }
-        })
-        ));
-
-        return new CustomGroupOperation(myProject);
-    }
-
-    private CustomGroupOperation projectNear(){
-        DBObject myProject = (DBObject)new BasicDBObject(
-                "$project", new BasicDBObject(
-                "name","$name")
-                .append("id","$_id")
-                .append("rate",new BasicDBObject(
-                "$avg",new Object[]{
-                        "rate.general_rate"
-                }
-
-        ))
-        );
-        return new CustomGroupOperation(myProject);
-    }
-
-    private GeoNearOperationExt projectNEAR(){
-        NearQuery near = null;
-        return new GeoNearOperationExt(near);
-    }
-
-    private class GeoNearOperationExt implements AggregationOperation {
-
-        private NearQuery nearQuery;
-
-        private String distanceField = "distance";
-
-        public GeoNearOperationExt(NearQuery nearQuery) {
-            this.nearQuery = nearQuery;
-        }
-
-        /**
-         * Default is distance
-         * @return
-         */
-        public String getDistanceField() {
-            return distanceField;
-        }
-
-        /**
-         * Set distanceField value Default is distance
-         * @param distanceField
-         */
-        public void setDistanceField(String distanceField) {
-            this.distanceField = distanceField;
-        }
-
-
-
-        @Override
-        public DBObject toDBObject(AggregationOperationContext context) {
-            DBObject dbObject = context.getMappedObject(nearQuery.toDBObject());
-            dbObject.put("distanceField", distanceField);
-            return new BasicDBObject("$geoNear", dbObject);
-        }
-    }
-
-
 
 }
 

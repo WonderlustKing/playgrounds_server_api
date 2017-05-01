@@ -7,9 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-/**
- * Created by christos on 17/8/2016.
- */
 @Configuration
 @EnableCaching
 public class CachingConfig {
